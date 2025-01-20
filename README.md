@@ -4,7 +4,8 @@
 
 ## 注意
 > [!WARNING]
-> WSLは使用しないでください
+> - WSLは使用しないでください
+> - firebase cliへのlogin忘れずに
 
 ## Setup
 
@@ -17,8 +18,9 @@ miseを入れたらあとはよしなにやってくれます
 手動デス
 - **必須**
   - [Taskfile](https://taskfile.dev/installation/)
-  - [Go](https://go.dev/) ※一応入れといてください
   - [Bun](https://bun.sh/)
+- 任意
+  - [Go](https://go.dev/)
 
 ### 実行
 
