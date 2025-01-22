@@ -1,4 +1,4 @@
-import './Header.css';
+import './header.css';
 
 const Header = () => {
   return (
@@ -6,14 +6,13 @@ const Header = () => {
       <div className="header-container">
         <div className="logo">
           {/* うさぎのロゴ */}
-          <img src="../assets/rabbit-logo.png" alt="ロゴ" /> 
+          <img src="./image/rabbit-logo.png" alt="ロゴ" /> 
         </div>
         <nav className="nav">
           <ul>
             <li><a href="/">ホーム</a></li>
-            <li><a href="/about">私たちについて</a></li>
-            <li><a href="/service">サービス</a></li>
-            <li><a href="/contact">お問い合わせ</a></li>
+            <li><a href="/about">あなたの健康</a></li>
+            <li><a href="/service">気象情報</a></li>
           </ul>
         </nav>
       </div>
