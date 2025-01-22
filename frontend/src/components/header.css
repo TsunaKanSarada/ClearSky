@@ -1,0 +1,38 @@
+.header {
+    background-color: #f8e9e9; /* パステルピンク */
+    padding: 20px;
+  }
+  
+  .header-container {
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .logo img {
+    height: 50px; /* ロゴのサイズ調整 */
+  }
+  
+  .nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+  }
+  
+  .nav li {
+    margin-left: 30px;
+  }
+  
+  .nav a {
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+    transition: color 0.3s ease; /* ホバー時の色の変化を滑らかに */
+  }
+  
+  .nav a:hover {
+    color: #e9a8a8; /* ホバー時の色 */
+  }
