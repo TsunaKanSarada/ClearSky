@@ -2,7 +2,7 @@ import { AuthProvider, useAuth } from "./providers/authproviders";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import Header from "./components/header";
-import Dashboard from "./components/Dashboard";
+import Dashboard from "./components/dashboard";
 import Footer from "./components/footer";
 import Authpage from "./components/authpage";
 
