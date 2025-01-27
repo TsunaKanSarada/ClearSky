@@ -22,6 +22,14 @@ miseを入れたらあとはよしなにやってくれます
 - 任意
   - [Go](https://go.dev/)
 
+### tailwindcss
+```bash
+# bun 使う方法もあるけど一旦 npm で
+$ cd frontend
+$ npm install -D tailwindcss postcss autoprefixer
+$ npx tailwindcss init
+```
+
 ### 実行
 
 #### Mac
@@ -35,8 +43,7 @@ task pre
 task pre
 ```
 
-## Dev
+#### Dev
 ```shell
 task dev
 ```
-

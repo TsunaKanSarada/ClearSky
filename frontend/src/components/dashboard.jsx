@@ -24,6 +24,7 @@ const Dashboard = () => {
 
     return (
         <div className="home-container">
+            <p className="text-3xl font-bold underline">Hello world!</p>
             <h1>ホーム画面</h1>
             <p>こんにちは、{user.email} さん！</p>
             <button onClick={handleSignOut} className="button signout">

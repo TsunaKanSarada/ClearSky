@@ -1,43 +1,10 @@
-import { AuthProvider, useAuth } from "./providers/authproviders";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import PropTypes from "prop-types";
-import Header from "./components/header";
-import Dashboard from "./components/Dashboard";
-import Footer from "./components/footer";
-import Authpage from "./components/authpage";
-
-const ProtectedRoute = ({ children }) => {
-    const { currentUser } = useAuth();
-    if (!currentUser) {
-        return <Navigate to="/" replace />;
-    }
-    return children;
-};
-
-ProtectedRoute.propTypes = {
-    children: PropTypes.node.isRequired,
-};
+import { AuthProvider } from "./providers/authproviders";
+import RouteController from "./components//RouteController";
 
 function App() {
     return (
         <AuthProvider>
-            <Router>
-                <Routes>
-                    <Route path="/" element={<Authpage />} />
-                    <Route
-                        path="/home"
-                        element={
-                            <ProtectedRoute>
-                                <>
-                                    <Header />
-                                    <Dashboard />
-                                    <Footer />
-                                </>
-                            </ProtectedRoute>
-                        }
-                    />
-                </Routes>
-            </Router>
+            <RouteController />
         </AuthProvider>
     );
 }
