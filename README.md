@@ -7,6 +7,47 @@
 > - WSLは使用しないでください
 > - firebase cliへのlogin忘れずに
 
+## プロジェクト解説
+### ディレクトリ構造
+
+ ClearSky/  
+├── frontend/           # フロントエンド  
+├── src/  
+│   │   ├── components/    # UIコンポーネント  
+│   │   │   ├── header.jsx  
+│   │   │   ├── footer.jsx  
+│   │   │   ├── dashboard.jsx  
+│   │   │   └── authpage.jsx  
+│   │   ├── providers/     # コンテキストプロバイダー  
+│   │   │   └── authproviders.jsx  
+│   │   ├── service/       # 外部サービス連携  
+│   │   │   ├── auth.js     # Firebase認証  
+│   │   │   └── firebase.js  # Firebase設定  
+│   │   └── App.jsx         # アプリケーションのルート  
+│   └── public/            # 静的ファイル  
+│  
+├── Taskfile.yml         # タスクランナー設定  
+└── README.md            # プロジェクト説明  
+
+### 主要機能
+
+1. 認証機能  
+* Firebase認証（メール/パスワード、Google）  
+* 保護されたルート
+* ログイン状態管理  
+2. ルーティング  
+* プロテクトルート（home）：認証済みユーザーのみ  
+* パブリックルート（/）：ログインページ  
+3. UI構成
+* ダッシュボード：メインコンテンツ  
+* ヘッダー：ナビゲーション  
+* フッター：補足情報  
+4. 開発環境  
+* Vite + React  
+* TailwindCSS  
+* Firebase  
+* Bun（パッケージマネージャー）  
+
 ## Setup
 
 ### インストール
