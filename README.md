@@ -11,7 +11,7 @@
 ### ディレクトリ構造
 
  ClearSky/  
-├── doc/           # Zenn記事 
+├── doc/           # Zenn記事  
 ├── frontend/           # フロントエンド  
 ├── src/  
 │   │   ├── components/    # UIコンポーネント  
