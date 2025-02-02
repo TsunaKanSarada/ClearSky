@@ -5,6 +5,21 @@ type: "idea" # tech: 技術記事 / idea: アイデア
 topics: ["react", "Vite", "Firebase"]
 published: false # -> デプロイ時にtrueへ
 # published: true
+
+"""
+[📘 How to use] (https://zenn.dev/zenn/articles/zenn-cli-guide)
+
+> Commands
+
+* npx zenn preview [プレビュー開始]
+
+> 気をつけること  
+* タイトルと見出し: 記事のタイトルと見出しは、わかりやすく、興味を引くものにすることを心がける
+* 図表やイラスト: 図表やイラストを効果的に使用することで、記事の内容をよりわかりやすく伝える
+* コード: コードを掲載する場合は、シンタックスハイライトなどを用いて、見やすく表示する 
+* 公開: 記事が完成したら、published: true に変更して公開する
+
+"""
 ---
 
 # 記事構成
