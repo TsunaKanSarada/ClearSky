@@ -29,8 +29,10 @@ const Dashboard = () => {
   // 新規追加：mochimochiアニメーション用 state
   const [isMochimochi, setIsMochimochi] = useState(false);
 
-  // 新規追加：悲しそうなアニメーション（画像が落ち込む）のみ
+  // 既存：画像が落ち込む（sulk）アニメーション用 state
   const [isSulk, setIsSulk] = useState(false);
+  // 新規追加：画像が怒っている（＝起こっている）アニメーション用 state
+  const [isAngry, setIsAngry] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
@@ -127,12 +129,16 @@ const Dashboard = () => {
     setTimeout(() => setIsMochimochi(false), 1500);
   };
 
-  // 新規追加：画像が落ち込む（sulk）アニメーションハンドラ
-  // このハンドラ実行時、画像自体に落ち込むアニメーションを適用し、
-  // 同時に画像の右上にがっかりするアニメーションを表示します
+  // 画像が落ち込む（sulk）アニメーションハンドラ
   const handleSulk = () => {
     setIsSulk(true);
     setTimeout(() => setIsSulk(false), 2000);
+  };
+
+  // 新規追加：画像が怒っている（起こっている）アニメーションハンドラ
+  const handleAngry = () => {
+    setIsAngry(true);
+    setTimeout(() => setIsAngry(false), 2000);
   };
 
   if (!user) return null;
@@ -335,6 +341,26 @@ const Dashboard = () => {
           .animate-disappointed {
             animation: disappointedAnim 2s ease;
           }
+          /* 新規追加：画像が怒っている（起こっている）アニメーション */
+          @keyframes angryAnim {
+            0% { transform: scale(1) rotate(0deg); filter: brightness(1); }
+            25% { transform: scale(1.1) rotate(-10deg); filter: brightness(1.2); }
+            50% { transform: scale(1) rotate(10deg); filter: brightness(1.4); }
+            75% { transform: scale(1.1) rotate(-10deg); filter: brightness(1.2); }
+            100% { transform: scale(1) rotate(0deg); filter: brightness(1); }
+          }
+          .animate-angry {
+            animation: angryAnim 2s ease;
+          }
+          /* 新規追加：怒っている絵文字のアニメーション（画像左上に表示） */
+          @keyframes angryOverlayAnim {
+            0% { opacity: 0; transform: translate(-10px, 10px); }
+            50% { opacity: 1; transform: translate(0, 0); }
+            100% { opacity: 0; transform: translate(-10px, 10px); }
+          }
+          .animate-angryOverlay {
+            animation: angryOverlayAnim 2s ease;
+          }
         `}
       </style>
 
@@ -366,12 +392,19 @@ const Dashboard = () => {
             ${isPoyon ? "animate-poyon" : ""}
             ${isMochimochi ? "animate-mochimochi" : ""}
             ${isSulk ? "animate-sulk" : ""}
+            ${isAngry ? "animate-angry" : ""}
           `}
         />
-        {/* がっかりするアニメーション（画像の右上に表示） */}
+        {/* がっかりするアニメーション（画像右上に表示） */}
         {isSulk && (
           <div className="absolute top-0 right-0">
             <span className="animate-disappointed text-6xl">🌧</span>
+          </div>
+        )}
+        {/* 怒っているアニメーション（画像左上に表示） */}
+        {isAngry && (
+          <div className="absolute top-0 left-0">
+            <span className="animate-angryOverlay text-6xl">😡</span>
           </div>
         )}
       </div>
@@ -432,6 +465,10 @@ const Dashboard = () => {
         {/* 画像が落ち込むボタン */}
         <button onClick={handleSulk} className="px-4 py-2 bg-darkslategray text-white rounded hover:bg-darkslategray transition-colors duration-200">
           画像が落ち込む
+        </button>
+        {/* 新規追加：画像が怒っている（起こっている）ボタン */}
+        <button onClick={handleAngry} className="px-4 py-2 bg-red-800 text-white rounded hover:bg-red-900 transition-colors duration-200">
+          画像が起こっている
         </button>
       </div>
     </div>
