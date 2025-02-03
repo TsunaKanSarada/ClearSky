@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth } from "firebase/auth"; // Authentication
+import { getFirestore } from "firebase/firestore"; // Firestore
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -15,3 +16,6 @@ const app = initializeApp(firebaseConfig);
 
 // 認証サービスの初期化
 export const auth = getAuth(app);
+
+// Firestore サービスの初期化
+export const db = getFirestore(app);
