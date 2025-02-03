@@ -1,7 +1,7 @@
 // Dashboard.js
-import { signOutUser } from "../service/auth";
+import { signOutUser } from "../../service/auth";
 import { useState, useEffect } from "react";
-import { auth } from "../service/firebase";
+import { auth } from "../../service/firebase";
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);

@@ -1,5 +1,5 @@
 import { AuthProvider } from "./providers/authproviders";
-import RouteController from "./components//RouteController";
+import RouteController from "./RouteController";
 
 function App() {
     return (
