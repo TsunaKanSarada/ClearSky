@@ -16,11 +16,11 @@ import { db } from "../firebase"; // Firestore の初期化
 // コレクション, フィールドを定義
 
 // コレクション名称を定義
-const collectionNames = ["users", "weatherData", "aiInteractions"];
-const subcollectionNames = {
+const collectionNames = ["users", "weatherData", "ai"];
+const subCollectionNames = {
   users: ["profile", "health", "dailyStatus"],
   weatherData: [], // サブコレクションがない場合は空配列
-  aiInteractions: ["predictionAI", "commentAI"]
+  ai: ["predictionAI", "assistantAI", "commentAI"]
 };
 
 
@@ -34,17 +34,18 @@ async function createUsers() {
     console.log(`コレクション "${collectionNames[0]}" を生成しました。`, docRef.id);
 
     // 1-1. サブコレクション "profile" の生成
-    const profileCollectionRef = collection(docRef, subcollectionNames.users[0]);
+    const profileCollectionRef = collection(docRef, subCollectionNames.users[0]);
     const profileDocRef = await addDoc(profileCollectionRef, {
         birthDate: new Date("1990-01-01"),
-        gender: "",
+        gender: 0, // index 0: 男性, 1: 女性, 2: その他
+        character: 0, // index 0: ハムスター, 1: モモンガ, 2: 猫
         registeredAt: new Date(),
         updatedAt: new Date()
     });
-    console.log(`サブコレクション "${subcollectionNames.users[0]}" を生成しました。`, profileDocRef.id);
+    console.log(`サブコレクション "${subCollectionNames.users[0]}" を生成しました。`, profileDocRef.id);
 
     // 1-2. サブコレクション "health" の生成
-    const healthCollectionRef = collection(docRef, subcollectionNames.users[1]);
+    const healthCollectionRef = collection(docRef, subCollectionNames.users[1]);
     const healthDocRef = await addDoc(healthCollectionRef, {
         heightCm: 170,
         weightKg: 60,
@@ -53,48 +54,50 @@ async function createUsers() {
         registeredAt: new Date(),
         updatedAt: new Date()
     });
-    console.log(`サブコレクション "${subcollectionNames.users[1]}" を生成しました。`, healthDocRef.id);
+    console.log(`サブコレクション "${subCollectionNames.users[1]}" を生成しました。`, healthDocRef.id);
 
     // 1-3. サブコレクション "dailyStatus" の生成
-    const dailyStatusCollectionRef = collection(docRef, subcollectionNames.users[2]);
+    const dailyStatusCollectionRef = collection(docRef, subCollectionNames.users[2]);
     const dailyStatusDocRef = await addDoc(dailyStatusCollectionRef, {
         location: new GeoPoint(35.6895, 139.6917),
         sleepHours: 7,
         createDate: new Date()
     });
-    console.log(`サブコレクション "${subcollectionNames.users[2]}" を生成しました。`, dailyStatusDocRef.id);
+    console.log(`サブコレクション "${subCollectionNames.users[2]}" を生成しました。`, dailyStatusDocRef.id);
 
     return docRef.id; // 生成したドキュメントのIDを返す
   } catch (e) { // エラー処理
-    console.error("削除エラー", e);
+    console.error("生成エラー", e);
     throw e;
   }
 };
 
 // 2.weatherDataコレクションの生成
-async function createWetherData() {
+async function createWeatherData() {
   try {
     const docRef = await addDoc(collection(db, collectionNames[1]), {
         location: new GeoPoint(35.6895, 139.6917),
         forecastDate: new Date(),
-        temperature: 25,
+        weatherCode: 0, // index 0: 晴れ ~ 99: 雷雨
+        temperatureMax: 25,
+        temperatureMin: 15,
+        apparentTemperatureMax: 28,
+        apparentTemperatureMin: 18,
         humidity: 60,
         pressure: 1013,
-        weather: "Sunny",
-        pollenLevel: 1,
-        pollenType: "Grass"
+        windSpeed: 5,
     });
     console.log(`コレクション "${collectionNames[1]}" を生成しました。`, docRef.id);
 
     return docRef.id; // 生成したドキュメントのIDを返す
   } catch (e) { // エラー処理
-    console.error("削除エラー", e);
+    console.error("生成エラー", e);
     throw e;
   }
 };
 
-// 3.aiInteractionsコレクションの生成
-async function createAiInteractions() {
+// 3.aiコレクションの生成
+async function createAi() {
     try {
       const docRef = await addDoc(collection(db, collectionNames[2]), {
             recordId: "healthRecord000",
@@ -104,24 +107,31 @@ async function createAiInteractions() {
     console.log(`コレクション "${collectionNames[2]}" を生成しました。`, docRef.id);
 
     // 3-1. サブコレクション "predictionAI" の生成
-    const predictionAICollectionRef = collection(docRef, subcollectionNames.aiInteractions[0]);
+    const predictionAICollectionRef = collection(docRef, subCollectionNames.ai[0]);
     const predictionAIDocRef = await addDoc(predictionAICollectionRef, {
         headacheLevel: 1,
-        pollinosisLevel: 1
     });
-    console.log(`サブコレクション "${subcollectionNames.aiInteractions[0]}" を生成しました。`, predictionAIDocRef.id);
+    console.log(`サブコレクション "${subCollectionNames.ai[0]}" を生成しました。`, predictionAIDocRef.id);
 
-    // 3-2. サブコレクション "commentAI" の生成
-    const commentAICollectionRef = collection(docRef, subcollectionNames.aiInteractions[1]);
-    const commentAIDocRef = await addDoc(commentAICollectionRef, {
-        emotion: "happy",
+    // 3-2. サブコレクション "assistantAI" の生成
+    const assistantAICollectionRef = collection(docRef, subCollectionNames.ai[1]);
+    const assistantAIDocRef = await addDoc(assistantAICollectionRef, {
+        emotion: 0, // index 0: happy, 1: sad, 2: angry
         comment: "You are in good condition today."
     });
-    console.log(`サブコレクション "${subcollectionNames.aiInteractions[1]}" を生成しました。`, commentAIDocRef.id);
+    console.log(`サブコレクション "${subCollectionNames.ai[1]}" を生成しました。`, assistantAIDocRef.id);
+
+    // 3-3. サブコレクション "commentAI" の生成
+    const commentAICollectionRef = collection(docRef, subCollectionNames.ai[2]);
+    const commentAIDocRef = await addDoc(commentAICollectionRef, {
+        weather: "happy",
+        comment: "You are in good condition today."
+    });
+    console.log(`サブコレクション "${subCollectionNames.ai[2]}" を生成しました。`, commentAIDocRef.id);
 
     return docRef.id; // 生成したドキュメントのIDを返す
   } catch (e) { // エラー処理
-    console.error("削除エラー", e);
+    console.error("生成エラー", e);
     throw e;
   }
 };
@@ -129,9 +139,9 @@ async function createAiInteractions() {
 // 全てのコレクションを削除
 
 // 指定のドキュメントとそのサブコレクションを再帰的に削除する関数を作成
-const deleteDocumentRecursively = async (docRef, subcollectionNames = []) => {
+const deleteDocumentRecursively = async (docRef, subCollectionNames = []) => {
   // 既知のサブコレクションを取得して削除
-  for (const subColName of subcollectionNames) {
+  for (const subColName of subCollectionNames) {
     const subColRef = collection(docRef, subColName);
     const subSnapshot = await getDocs(subColRef);
     const subDeletePromises = subSnapshot.docs.map((subDoc) =>
@@ -150,7 +160,7 @@ export const deleteDocuments = async (collectionNames) => {
   try {
     for (const colName of collectionNames) {
       // colName に対応するサブコレクションを取得（無い場合は空配列を取り出す）
-      const subColNames = subcollectionNames[colName] || [];
+      const subColNames = subCollectionNames[colName] || [];
       const colRef = collection(db, colName);
       const querySnapshot = await getDocs(colRef);
 
@@ -173,8 +183,8 @@ export const deleteDocuments = async (collectionNames) => {
 async function  setupCollections() {
   await deleteDocuments(collectionNames); // XXX: 削除処理、気をつけて！！
   await createUsers();
-  await createWetherData();
-  await createAiInteractions();
+  await createWeatherData();
+  await createAi();
 }
 
 export default { setupCollections }; // 外部で実行 & エラー処理
