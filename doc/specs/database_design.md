@@ -31,8 +31,8 @@
 | フィールド名 | データ型 | 説明 |
 |---|---|---|
 | birthDate | timestamp | 生年月日 |
-| gender | number | 性別 (index)|
-| character | number | キャラクター (index) |
+| gender | number | 性別 (0: 男性, 1: 女性, 2: その他)|
+| character | number | キャラクター (0: ハムスター, 1: モモンガ, 2: 猫) |
 | registeredAt | timestamp | 登録日時 |
 | updatedAt | timestamp | 最終更新日時 |
 
@@ -60,16 +60,14 @@
 |---|---|---|
 | location | geopoint | 位置情報 | => dailyStatus サブコレクションと連携
 | forecastDate | timestamp | 記録日時 |
-| weather | number | 天気コード |
-| temperature_max | number | 最高気温 |
-| temperature_min | number | 最低気温 |
-| apparent_temperature_max | number | 体感最高気温 |
-| apparent_temperature_min | number | 体感最低気温 |
+| weatherCode | number | 天気コード (0: 晴れ ~ 99: 雷雨)|
+| temperatureMax | number | 最高気温 |
+| temperatureMin | number | 最低気温 |
+| apparentTemperatureMax | number | 体感最高気温 |
+| apparentTemperatureMin | number | 体感最低気温 |
 | humidity | number | 湿度 |
 | pressure | number | 気圧 |
 | windSpeed | number | 風速 |
-| pollenLevel | number | 花粉レベル |
-| pollenType | string | 花粉の種類 |
 
 
 ---
@@ -90,13 +88,13 @@
 #### `assistantAI`サブコレクション -> アシスタントAI
 | フィールド名 | データ型 | 説明 |
 |---|---|---|
-| emotion | number | 感情ステータス (index) |
+| emotion | number | 感情ステータス (0: happy, 1: sad, 2: angry) |
 | comment | String | ユーザーへのコメント |
 
 #### `commentAI`サブコレクション -> 短文コメントAI
 | フィールド名 | データ型 | 説明 |
 |---|---|---|
-| whether | string | 気象情報に対してのコメント | -> infoページに表示
+| weather | string | 気象情報に対してのコメント | -> infoページに表示
 | condition | String | ユーザーの体調コメント | -> playRoomページに表示
 
 ## 4. データ構造図
@@ -142,15 +140,16 @@ flowchart TB
   subgraph weatherDate
     weather_location[location]
     forecast[forecastDate]
-    temp[temperature]
+    weather_code[weatherCode]
+    temp_max[temperatureMax]
+    temp_min[temperatureMin]
+    app_temp_max[apparentTemperatureMax]
+    app_temp_min[apparentTemperatureMin]
     humid[humidity]
     press[pressure]
-    weather_status[weather]
-    pollen_level[pollenLevel]
-    pollen_type[pollenType]
   end
 
-  %% aiInteractionsコレクション
+  %% aiコレクション
   subgraph ai
     record_id[recordId]
     ai_user_id[userId]
@@ -159,22 +158,25 @@ flowchart TB
     %% predictionAIサブコレクション
     subgraph prediction
       headache[headacheLevel]
-      pollen[pollinosisLevel]
+    end
+
+    %% assistantAIサブコレクション
+    subgraph assistant
+      mood[emotion]
+      ai_comment[comment]
     end
 
     %% commentAIサブコレクション
     subgraph comment
-      mood[emotion]
-      ai_comment[comment]
+      info_comment[weather]
+      shown_comment[condition]
     end
   end
 
-
-  user_location[location] --- weather_location[location]
 ```
 
 * `dailyStatus` サブコレクションと `weatherData` コレクションは、locationで関連付け
-* `weatherData` コレクション の情報は `predictionAI` サブコレクションへ送信
+* `weatherData` コレクション の情報は `predictionAI`, `commentAI` サブコレクションへ送信
 
 
 ## 5. その他
@@ -187,5 +189,6 @@ flowchart TB
 * 2024/02/03: 初版作成
 * 2025/02/05: 第2版作成  
   * `weatherData`コレクションを`open-meteo`APIに最適化  
+  * `weatherData`コレクションから花粉情報(`pollen`関連)を削除  
   * `users` -> `profile`サブコレクションに`character`を追記  
   * `ai` -> `assistantAI`, `commentAI`サブコレクションを追記  
