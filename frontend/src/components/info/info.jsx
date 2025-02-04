@@ -1,5 +1,6 @@
 import React from "react";
-import RiskBar from "./riskbar";
+import Loading from "../loading";
+import SleepChart from "./sleepchart"; // SleepChart コンポーネントをインポート
 
 // 天気コードに応じたアイコン（絵文字）を返すヘルパー関数
 function getWeatherIcon(weathercode) {
@@ -28,10 +29,9 @@ const Info = () => {
   const [dailyData, setDailyData] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
-  // 初期値として現在のウィンドウの横幅を取得
   const [deviceWidth, setDeviceWidth] = React.useState(window.innerWidth);
 
-  // ウィンドウサイズの変更を監視し、deviceWidth を更新する
+  // ウィンドウサイズの変更監視
   React.useEffect(() => {
     const handleResize = () => {
       setDeviceWidth(window.innerWidth);
@@ -42,11 +42,11 @@ const Info = () => {
 
   React.useEffect(() => {
     // 東京付近の座標で、今後7日分の日別天気予報を取得
-    // daily パラメータでは天気、気温、体感気温、風速、降水確率を、
-    // hourly パラメータでは正午の相対湿度と気圧 (surface_pressure) を取得
+    // daily パラメータに天気、気温、体感温度、風速、降水確率、UV 指数を、
+    // hourly パラメータに正午の相対湿度と気圧 (surface_pressure) を取得
     const url =
       "https://api.open-meteo.com/v1/forecast?latitude=35.6895&longitude=139.6917" +
-      "&daily=weathercode,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,wind_speed_10m_max,precipitation_probability_max" +
+      "&daily=weathercode,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,wind_speed_10m_max,precipitation_probability_max,uv_index_max" +
       "&hourly=relativehumidity_2m,surface_pressure" +
       "&forecast_days=7" +
       "&timezone=Asia%2FTokyo";
@@ -68,31 +68,37 @@ const Info = () => {
           apparent_temperature_min,
           wind_speed_10m_max,
           precipitation_probability_max,
+          uv_index_max,
         } = data.daily;
         const hourlyTimes = data.hourly.time; // "YYYY-MM-DDThh:mm" の形式
         const hourlyHumidity = data.hourly.relativehumidity_2m;
         const hourlyPressure = data.hourly.surface_pressure;
-        // 各配列のインデックスが対応している前提で、必要なデータをまとめる
+
         const days = time.map((date, index) => {
-          // 正午のデータを取得（例: "2022-07-01T12:00"）
+          // 正午のデータ（例: "YYYY-MM-DDT12:00"）を取得
           const targetTime = `${date}T12:00`;
           const hourlyIndex = hourlyTimes.indexOf(targetTime);
           const humidity =
             hourlyIndex !== -1 ? Math.round(hourlyHumidity[hourlyIndex]) : "N/A";
           const pressure =
             hourlyIndex !== -1 ? Math.round(hourlyPressure[hourlyIndex]) : "N/A";
+          const uv_index = Math.round(uv_index_max[index]);
+          const uv_index_percent = Math.round((uv_index / 11) * 100);
+
           return {
             date,
             weathercode: weathercode[index],
             temperature_max: Math.round(temperature_2m_max[index]),
             temperature_min: Math.round(temperature_2m_min[index]),
-            // 体感気温も追加
             apparent_temperature_max: Math.round(apparent_temperature_max[index]),
             apparent_temperature_min: Math.round(apparent_temperature_min[index]),
-            wind_speed: Math.round(wind_speed_10m_max[index]),
-            humidity,
+            wind_speed: Math.round((wind_speed_10m_max[index] / 3.6) * 10) / 10,
             precipitation: Math.round(precipitation_probability_max[index]),
+            uv_index, // 元の UV 指数の値
+            uv_index_percent, // パーセンテージ用
+            humidity,
             pressure,
+            formattedDate: formatDate(date),
           };
         });
         setDailyData(days);
@@ -105,9 +111,12 @@ const Info = () => {
       });
   }, []);
 
+  // SleepChart に渡すための気圧データ
+  const pressureData = dailyData.map((day) => day.pressure);
+
   return (
     <div style={{ width: `${deviceWidth}px` }} className="mx-auto">
-      {loading && <p>データを読み込み中...</p>}
+      {loading && <Loading />}
       {error && (
         <p className="text-red-600">エラーが発生しました: {error.message}</p>
       )}
@@ -115,15 +124,15 @@ const Info = () => {
 
       {!loading && !error && dailyData.length > 0 && (
         <>
-          {/* 天気・気温等の情報表示 */}
-          <div className="flex w-full">
+          {/* 天気情報の UI */}
+          <div className="flex w-full mb-4">
             {dailyData.map((day) => (
               <div
                 key={day.date}
                 className="flex-1 border border-gray-300 rounded px-1 py-1 flex flex-col items-center"
               >
                 <div className="w-full text-center text-xs border-b border-gray-300 pb-1">
-                  {formatDate(day.date)}
+                  {day.formattedDate}
                 </div>
                 <div className="flex flex-col items-center justify-center pt-1">
                   <span className="text-lg">{getWeatherIcon(day.weathercode)}</span>
@@ -131,37 +140,24 @@ const Info = () => {
                     <span className="text-red-500">{day.temperature_max}°</span>/
                     <span className="text-blue-500">{day.temperature_min}°</span>
                   </span>
-                    <div className="text-center">
-                        <div className="text-[8.8px]">体感温度</div>
-                        <span className="text-xs mb-1">
-                            <span className="text-red-500">{day.apparent_temperature_max}°</span>/
-                            <span className="text-blue-500">{day.apparent_temperature_min}°</span>
-                        </span>
-                    </div>
+                  <div className="text-center">
+                    <div className="text-[8.8px]">体感温度</div>
+                    <span className="text-xs mb-1">
+                      <span className="text-red-500">{day.apparent_temperature_max}°</span>/
+                      <span className="text-blue-500">{day.apparent_temperature_min}°</span>
+                    </span>
+                  </div>
                   <span className="text-[9px]">☔ {day.precipitation}%</span>
                   <span className="text-[9px]">💧 {day.humidity}%</span>
-                  <span className="text-[9px]">🍃 {day.wind_speed}m</span>
+                  <span className="text-[9px]">🍃 {day.wind_speed}m/s</span>
+                  <span className="text-[9px]">🔆 {day.uv_index_percent}%</span>
                 </div>
               </div>
             ))}
           </div>
-        
-          {/*
-          <div className="mt-4">
-            <h2 className="text-center text-lg">1週間の気圧 (hPa)</h2>
-            <div className="flex w-full justify-around">
-              {dailyData.map((day) => (
-                <div key={day.date} className="text-center">
-                  <div className="text-xs">{formatDate(day.date)}</div>
-                  <div className="text-sm font-medium">{day.pressure}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-          */}
-          <RiskBar value={20} />
-          <RiskBar value={20} />
-          <RiskBar value={20} />
+
+          {/* SleepChart コンポーネントに気圧データを渡して表示 */}
+          <SleepChart pressureData={pressureData} />
         </>
       )}
     </div>

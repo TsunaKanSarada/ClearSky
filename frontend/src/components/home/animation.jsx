@@ -528,13 +528,13 @@ const Dashboard = () => {
         {/* がっかりするアニメーション（画像右上に表示） */}
         {isSulk && (
           <div className="absolute top-0 right-0">
-            <span className="animate-disappointed text-6xl">🌧</span>
+            <span className="animate-disappointed text-8xl">🌧</span>
           </div>
         )}
         {/* 怒っているアニメーション（画像左上に表示） */}
         {isAngry && (
           <div className="absolute top-0 left-0">
-            <span className="animate-angryOverlay text-6xl">😡</span>
+            <span className="animate-angryOverlay text-8xl">😡</span>
           </div>
         )}
       </div>

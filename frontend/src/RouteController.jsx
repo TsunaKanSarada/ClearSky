@@ -48,7 +48,6 @@ function RouteController() {
                                 <Header />
                                 <AIcomment />
                                 <Info />
-                                <SleepChart/>
                                 <Footer />
                             </>
                         </ProtectedRoute>
