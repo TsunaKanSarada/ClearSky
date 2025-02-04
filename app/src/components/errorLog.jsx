@@ -1,7 +1,7 @@
 // エラー確認時にはHACKコメントを外して利用
 
 import { useEffect } from "react";
-import dbService from "../service/db"; // dbService をインポート
+import dbService from "../service/firestore/index"; // dbService をインポート
 
 // ErrorLog コンポーネント：エラー処理の実行とログ出力
 function ErrorLog() {

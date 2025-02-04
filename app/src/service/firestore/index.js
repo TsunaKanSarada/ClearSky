@@ -5,7 +5,7 @@ import {
     deleteDoc, 
     GeoPoint // 座標データを扱うためのクラス
 } from "firebase/firestore";
-import { db } from "./firebase"; // Firestore の初期化
+import { db } from "../firebase"; // Firestore の初期化
 
 /* 構築手順 (実行時に並び替え)
 1.コレクションを全て削除
