@@ -15,27 +15,28 @@
 |---|---|
 | users | ユーザー情報を格納 |
 | weatherData | APIから取得した気象情報等を格納 |
-| aiInteractions | AI情報を格納|
+| ai | AI情報を格納|
 
 ## 3. ドキュメント定義
 
-### users コレクション
+### `users`コレクション
 
 | フィールド名 | データ型 | 説明 |
 |---|---|---|
 | userId | string | ユーザーID (Firebase Authentication UID) |
 | name | string | ユーザー名 |
 
-#### profile サブコレクション -> 固定値
+#### `profile`サブコレクション -> 固定値
 
 | フィールド名 | データ型 | 説明 |
 |---|---|---|
 | birthDate | timestamp | 生年月日 |
-| gender | string | 性別 |
+| gender | number | 性別 (index)|
+| character | number | キャラクター (index) |
 | registeredAt | timestamp | 登録日時 |
 | updatedAt | timestamp | 最終更新日時 |
 
-#### health サブコレクション -> 固定値
+#### `health`サブコレクション -> 固定値
 | フィールド名 | データ型 | 説明 |
 |---|---|---|
 | heightCm | number | 身長（cm） |
@@ -45,30 +46,34 @@
 | registeredAt | timestamp | 登録日時 |
 | updatedAt | timestamp | 最終更新日時 |
 
-#### dailyStatus サブコレクション -> 可変値
+#### `dailyStatus`サブコレクション -> 可変値
 | フィールド名 | データ型 | 説明 |
 |---|---|---|
 | location | geopoint | 位置情報 | -> 気象情報に使用
 | sleepHours | number | その日の睡眠時間 |
-| createdDate | timestamp | 記録作成日時 | ※可変値だからあっても良い気がするけど...？
+| createdDate | timestamp | 記録作成日時 |
 
 ---
-### weatherData コレクション -> 今は一元化しているが、APIが増えたらサブコレクションに細分化？
+### `weatherData`コレクション
 
 | フィールド名 | データ型 | 説明 |
 |---|---|---|
 | location | geopoint | 位置情報 | => dailyStatus サブコレクションと連携
 | forecastDate | timestamp | 記録日時 |
-| temperature | number | 気温 |
+| weather | number | 天気コード |
+| temperature_max | number | 最高気温 |
+| temperature_min | number | 最低気温 |
+| apparent_temperature_max | number | 体感最高気温 |
+| apparent_temperature_min | number | 体感最低気温 |
 | humidity | number | 湿度 |
 | pressure | number | 気圧 |
-| weather | string | 天気 |
+| windSpeed | number | 風速 |
 | pollenLevel | number | 花粉レベル |
 | pollenType | string | 花粉の種類 |
 
 
 ---
-### aiInteractions コレクション
+### `ai`コレクション
 
 | フィールド名 | データ型 | 説明 |
 |---|---|---|
@@ -76,19 +81,23 @@
 | userId | string | ユーザーID |
 | GeneratedDate | timestamp | 生成日時 |
 
-#### predictionAI サブコレクション　-> 予想AI
+#### `predictionAI`サブコレクション　-> 予測AI
 
 | フィールド名 | データ型 | 説明 |
 |---|---|---|
 | headacheLevel | number | 片頭痛の程度 (0-10) |
-| pollinosisLevel | number | 花粉症の程度 (0-10) |
 
-#### commentAI サブコレクション -> コメントAI
+#### `assistantAI`サブコレクション -> アシスタントAI
 | フィールド名 | データ型 | 説明 |
 |---|---|---|
-| emotion | string | 感情ステータス (happy|normal|sad|angry) |
+| emotion | number | 感情ステータス (index) |
 | comment | String | ユーザーへのコメント |
 
+#### `commentAI`サブコレクション -> 短文コメントAI
+| フィールド名 | データ型 | 説明 |
+|---|---|---|
+| whether | string | 気象情報に対してのコメント | -> infoページに表示
+| condition | String | ユーザーの体調コメント | -> playRoomページに表示
 
 ## 4. データ構造図
 
@@ -106,6 +115,7 @@ flowchart TB
     subgraph profile
       birth_date[birthDate]
       user_gender[gender]
+      character[character]
       profile_registered[registeredAt]
       profile_updated[updatedAt]
     end
@@ -163,16 +173,19 @@ flowchart TB
   user_location[location] --- weather_location[location]
 ```
 
-* dailyStatus サブコレクションと weatherData コレクションは、locationで関連付け
-* weatherData コレクション の情報は predictionAI サブコレクションへ送信
+* `dailyStatus` サブコレクションと `weatherData` コレクションは、locationで関連付け
+* `weatherData` コレクション の情報は `predictionAI` サブコレクションへ送信
 
 
 ## 5. その他
 
-* インデックス: healthRecords コレクションの userId、date、headacheLevel、pollenLevel にインデックスを作成する。
 * セキュリティルール: 各コレクションに対して、Firebase Authentication を使用したアクセス制御を行う。
 
 
-## 7. 更新履歴
+## ６. 更新履歴
 
-* 2024/02/03: 初版作成 → 熱中症やカレンダー情報などは未定義
+* 2024/02/03: 初版作成
+* 2025/02/05: 第2版作成  
+  * `weatherData`コレクションを`open-meteo`APIに最適化  
+  * `users` -> `profile`サブコレクションに`character`を追記  
+  * `ai` -> `assistantAI`, `commentAI`サブコレクションを追記  
