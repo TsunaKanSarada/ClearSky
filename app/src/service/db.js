@@ -9,7 +9,7 @@ import {
 import { db } from "./firebase"; // Firestore の初期化
 
 /* 構築手順
-0.コレクションを全て削除
+0.コレクションを全て削除 <未対応>
 1.コレクション、フィールドを定義 (テストデータを追加する形式)
 */
 
@@ -124,23 +124,14 @@ async function createAiInteractions() {
   }
 };
 
+// コレクションの処理を一元化する
+async function  setupCollections() {
+  createUsers();
+  createWetherData();
+  createAiInteractions();
+}
 
-createUsers();
-createWetherData();
-createAiInteractions();
-
-
-
-
-
-
-
-
-
-
-
-
-
+export default { setupCollections }; // 外部で実行 & エラー処理
 
 
 

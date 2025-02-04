@@ -7,6 +7,7 @@ import Header from "../components/header";
 import Dashboard from "../components/dashboard";
 import Footer from "../components/footer";
 import Authpage from "../components/authpage";
+import ErrorLog from "../components/errorLog";
 
 const ProtectedRoute = ({ children }) => {
     const { currentUser } = useAuth(); // 認証状態を取得
@@ -26,6 +27,8 @@ function RouteController() {
             <Routes>
                 {/* パブリックルート：ログインページ */}
                 <Route path="/" element={<Authpage />} />
+                {/* パブリックルート：エラーページ */}
+                <Route path="/error" element={<ErrorLog />} />
 
                 {/* プロテクトルート(要認証)：ホームページ */}
                 <Route
