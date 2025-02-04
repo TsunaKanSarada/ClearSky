@@ -8,7 +8,7 @@ tasks:
       - "echo \"\n----------✅開発準備完了！---------\n\\`task\\`で使用可能なコマンド一覧、\\`task dev\\`で開発を開始します🫡\""
 
   dev:
-    dir: frontend
+    dir: app
     desc: "💻: 開発"
     cmds:
       - "bun run dev"
@@ -20,13 +20,13 @@ tasks:
       # - task: backend:install
   
   frontend:install:
-    dir: frontend
+    dir: app
     desc: "🎨.⬇️: フロントエンドでbun install"
     cmds:
       - bun install
   
   frontend:module:
-    dir: frontend
+    dir: app
     desc: "🏳️.⬇️: フロントエンドに必要なmodule"
     cmds:
       - npm install dotenv
