@@ -3,10 +3,12 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import PropTypes from "prop-types";
 import { useAuth } from "./providers/authproviders";
 import Header from "./components/header";
-import Dashboard from "./components/home/dashboard";
+import Dashboard from "./components/home/animation";
 import Footer from "./components/footer";
 import Authpage from "./components/authpage";
 import Info from "./components/info/info"; // Infoコンポーネントをインポート
+import SleepChart from "./components/info/sleepchart";
+import AIcomment from "./components/info/AIcomment";
 import Chat from "./components/chat/chat";       // Chatコンポーネントをインポート
 
 const ProtectedRoute = ({ children }) => {
@@ -44,7 +46,9 @@ function RouteController() {
                         <ProtectedRoute>
                             <>
                                 <Header />
+                                <AIcomment />
                                 <Info />
+                                <SleepChart/>
                                 <Footer />
                             </>
                         </ProtectedRoute>
@@ -55,7 +59,6 @@ function RouteController() {
                     element={
                         <ProtectedRoute>
                             <>
-                                <Header />
                                 <Chat />
                                 <Footer />
                             </>

@@ -23,17 +23,17 @@ const Header = () => {
           : "bg-sky-400 text-white" // ライトモード時: 背景を水色、文字色を黒に
       } transition-colors duration-300`}
     >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+      <div className="container mx-auto px-1 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-12">
           {/* ヘッダーの左側 */}
           <div className="flex items-center">
             <a href="/" className="flex items-center">
               <Cloud
-                className={`h-10 w-10 mr-2 animate-pulse-slow ${
+                className={`h-8 w-8 mr-2 animate-pulse-slow ${
                   isDarkMode ? "text-yellow-200" : "text-white"
                 }`}
               />
-              <span className="text-3xl font-extrabold">
+              <span className="text-xl font-extrabold">
                 ClearSky
               </span>
             </a>
@@ -46,16 +46,16 @@ const Header = () => {
               aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
             >
               {isDarkMode ? (
-                <Sun className="h-8 w-8 text-yellow-300" />
+                <Sun className="h-6 w-6 text-yellow-300" />
               ) : (
-                <Moon className="h-8 w-8 text-white" />
+                <Moon className="h-6 w-6 text-white" />
               )}
             </button>
             <button
               className="p-2 rounded-full hover:bg-white/20 transition-colors duration-200 "
               aria-label="User menu"
             >
-              <User className="h-8 w-8" />
+              <User className="h-6 w-6" />
             </button>
           </div>
         </div>

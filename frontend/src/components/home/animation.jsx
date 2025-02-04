@@ -12,27 +12,30 @@ const Dashboard = () => {
   const [isWiggling, setIsWiggling] = useState(false);
   const [isFlipping, setIsFlipping] = useState(false);
   const [isJello, setIsJello] = useState(false);
-  // 追加のアニメーション用 state
   const [isShake, setIsShake] = useState(false);
   const [isZoom, setIsZoom] = useState(false);
   const [isSpin, setIsSpin] = useState(false);
   const [isSqueeze, setIsSqueeze] = useState(false);
   const [isBounceIn, setIsBounceIn] = useState(false);
-  // 新規追加：横から歩くアニメーション用 state
   const [isWalking, setIsWalking] = useState(false);
-  // 新規追加：奥から歩いてくるアニメーション用 state
   const [isWalkingFromBack, setIsWalkingFromBack] = useState(false);
-  // 新規追加：ふわふわ浮遊アニメーション用 state
   const [isFuwafuwa, setIsFuwafuwa] = useState(false);
-  // 新規追加：poyonアニメーション用 state
   const [isPoyon, setIsPoyon] = useState(false);
-  // 新規追加：mochimochiアニメーション用 state
   const [isMochimochi, setIsMochimochi] = useState(false);
-
-  // 既存：画像が落ち込む（sulk）アニメーション用 state
   const [isSulk, setIsSulk] = useState(false);
-  // 新規追加：画像が怒っている（＝起こっている）アニメーション用 state
   const [isAngry, setIsAngry] = useState(false);
+
+  // 既存の感情アニメーション state（喜び、信頼、恐れ、驚き、嫌悪、期待）…
+  const [isJoy, setIsJoy] = useState(false);
+  const [isTrust, setIsTrust] = useState(false);
+  const [isFear, setIsFear] = useState(false);
+  const [isSurprise, setIsSurprise] = useState(false);
+  const [isDisgust, setIsDisgust] = useState(false);
+  const [isAnticipation, setIsAnticipation] = useState(false);
+
+  // ------------------- 新規追加：画面外上側から降ってくる & 下からジャンプして登場するアニメーション用 state -------------------
+  const [isFallingFromTop, setIsFallingFromTop] = useState(false);
+  const [isJumpingUp, setIsJumpingUp] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
@@ -129,16 +132,56 @@ const Dashboard = () => {
     setTimeout(() => setIsMochimochi(false), 1500);
   };
 
-  // 画像が落ち込む（sulk）アニメーションハンドラ
   const handleSulk = () => {
     setIsSulk(true);
     setTimeout(() => setIsSulk(false), 2000);
   };
 
-  // 新規追加：画像が怒っている（起こっている）アニメーションハンドラ
   const handleAngry = () => {
     setIsAngry(true);
     setTimeout(() => setIsAngry(false), 2000);
+  };
+
+  // 既存：感情アニメーションのハンドラ
+  const handleJoy = () => {
+    setIsJoy(true);
+    setTimeout(() => setIsJoy(false), 1000);
+  };
+
+  const handleTrust = () => {
+    setIsTrust(true);
+    setTimeout(() => setIsTrust(false), 2000);
+  };
+
+  const handleFear = () => {
+    setIsFear(true);
+    setTimeout(() => setIsFear(false), 1500);
+  };
+
+  const handleSurprise = () => {
+    setIsSurprise(true);
+    setTimeout(() => setIsSurprise(false), 800);
+  };
+
+  const handleDisgust = () => {
+    setIsDisgust(true);
+    setTimeout(() => setIsDisgust(false), 1000);
+  };
+
+  const handleAnticipation = () => {
+    setIsAnticipation(true);
+    setTimeout(() => setIsAnticipation(false), 1500);
+  };
+
+  // ------------------- 新規追加：画面外上側から降ってくる & 下からジャンプして登場するハンドラ -------------------
+  const handleFallFromTop = () => {
+    setIsFallingFromTop(true);
+    setTimeout(() => setIsFallingFromTop(false), 2000);
+  };
+
+  const handleJumpUp = () => {
+    setIsJumpingUp(true);
+    setTimeout(() => setIsJumpingUp(false), 2000);
   };
 
   if (!user) return null;
@@ -341,7 +384,7 @@ const Dashboard = () => {
           .animate-disappointed {
             animation: disappointedAnim 2s ease;
           }
-          /* 新規追加：画像が怒っている（起こっている）アニメーション */
+          /* 新規追加：画像が怒っているアニメーション（既存） */
           @keyframes angryAnim {
             0% { transform: scale(1) rotate(0deg); filter: brightness(1); }
             25% { transform: scale(1.1) rotate(-10deg); filter: brightness(1.2); }
@@ -361,10 +404,89 @@ const Dashboard = () => {
           .animate-angryOverlay {
             animation: angryOverlayAnim 2s ease;
           }
+          /* ---------------- 新規追加：感情アニメーション ---------------- */
+          @keyframes joyAnim {
+            0% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.2) rotate(10deg); }
+            50% { transform: scale(1) rotate(0deg); }
+            75% { transform: scale(1.2) rotate(-10deg); }
+            100% { transform: scale(1) rotate(0deg); }
+          }
+          .animate-joy {
+            animation: joyAnim 1s ease;
+          }
+          @keyframes trustAnim {
+            0% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.5; }
+          }
+          .animate-trust {
+            animation: trustAnim 2s ease;
+          }
+          @keyframes fearAnim {
+            0% { transform: translateX(0); }
+            20% { transform: translateX(-5px); }
+            40% { transform: translateX(5px); }
+            60% { transform: translateX(-5px); }
+            80% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
+          }
+          .animate-fear {
+            animation: fearAnim 0.5s ease-in-out;
+            animation-iteration-count: 3;
+          }
+          @keyframes surpriseAnim {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+          }
+          .animate-surprise {
+            animation: surpriseAnim 0.8s ease;
+          }
+          @keyframes disgustAnim {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(0.9) rotate(15deg); }
+            100% { transform: scale(1) rotate(0deg); }
+          }
+          .animate-disgust {
+            animation: disgustAnim 1s ease;
+          }
+          @keyframes anticipationAnim {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.7; }
+          }
+          .animate-anticipation {
+            animation: anticipationAnim 1.5s ease;
+          }
+          /* ---------------- 新規追加：画面外上側から降ってくるアニメーション ---------------- */
+          @keyframes fallDown {
+            0% { transform: translateY(-250%); opacity: 1; }
+            60% { transform: translateY(-180%);opacity: 1; }
+            70% { transform: translateY(-130%); opacity: 1; }
+            80% { transform: translateY(-75%); opacity: 1; }
+            90% { transform: translateY(0); opacity: 1; }
+            95% { transform: scale(1.1, 0.9) translate(0%, 5%); }
+            100% { transform: scale(1.0, 1.0) translate(0%, 0%); }
+          }
+          .animate-fall-down {
+            animation: fallDown 2s ease-out;
+          }
+          /* ---------------- 新規追加：画面下からジャンプして登場するアニメーション ---------------- */
+          @keyframes jumpUp {
+            0% { transform: translateY(250%); opacity: 0; }
+            80% { transform: translateY(-50%); opacity: 1; }
+            90% { transform: translateY(0); opacity: 1; }
+            95% { transform: scale(1.1, 0.9) translate(0%, 5%); }
+            100% { transform: scale(1.0, 1.0) translate(0%, 0%); }
+          }
+          .animate-jump-up {
+            animation: jumpUp 2s ease-out;
+          }
         `}
       </style>
 
-      {/* 画像を含む外側コンテナ（relative指定でオーバーレイ要素の基準にする） */}
+      {/* 画像を含む外側コンテナ（relative 指定でオーバーレイ要素の基準にする） */}
       <div
         style={{
           transform: `rotate(${rotation}deg)`,
@@ -393,6 +515,14 @@ const Dashboard = () => {
             ${isMochimochi ? "animate-mochimochi" : ""}
             ${isSulk ? "animate-sulk" : ""}
             ${isAngry ? "animate-angry" : ""}
+            ${isJoy ? "animate-joy" : ""}
+            ${isTrust ? "animate-trust" : ""}
+            ${isFear ? "animate-fear" : ""}
+            ${isSurprise ? "animate-surprise" : ""}
+            ${isDisgust ? "animate-disgust" : ""}
+            ${isAnticipation ? "animate-anticipation" : ""}
+            ${isFallingFromTop ? "animate-fall-down" : ""}
+            ${isJumpingUp ? "animate-jump-up" : ""}
           `}
         />
         {/* がっかりするアニメーション（画像右上に表示） */}
@@ -462,13 +592,36 @@ const Dashboard = () => {
         <button onClick={handleSignOut} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-200">
           サインアウト
         </button>
-        {/* 画像が落ち込むボタン */}
         <button onClick={handleSulk} className="px-4 py-2 bg-darkslategray text-white rounded hover:bg-darkslategray transition-colors duration-200">
           画像が落ち込む
         </button>
-        {/* 新規追加：画像が怒っている（起こっている）ボタン */}
         <button onClick={handleAngry} className="px-4 py-2 bg-red-800 text-white rounded hover:bg-red-900 transition-colors duration-200">
           画像が起こっている
+        </button>
+        <button onClick={handleJoy} className="px-4 py-2 bg-amber-500 text-white rounded hover:bg-amber-600 transition-colors duration-200">
+          画像に喜びを表現
+        </button>
+        <button onClick={handleTrust} className="px-4 py-2 bg-blue-300 text-white rounded hover:bg-blue-400 transition-colors duration-200">
+          画像に信頼を表現
+        </button>
+        <button onClick={handleFear} className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-800 transition-colors duration-200">
+          画像に恐れを表現
+        </button>
+        <button onClick={handleSurprise} className="px-4 py-2 bg-pink-300 text-white rounded hover:bg-pink-400 transition-colors duration-200">
+          画像に驚きを表現
+        </button>
+        <button onClick={handleDisgust} className="px-4 py-2 bg-green-700 text-white rounded hover:bg-green-800 transition-colors duration-200">
+          画像に嫌悪を表現
+        </button>
+        <button onClick={handleAnticipation} className="px-4 py-2 bg-indigo-700 text-white rounded hover:bg-indigo-800 transition-colors duration-200">
+          画像に期待を表現
+        </button>
+        {/* ---------------- 新規追加：画面外上側から降ってくる & 下からジャンプして登場するボタン ---------------- */}
+        <button onClick={handleFallFromTop} className="px-4 py-2 bg-orange-700 text-white rounded hover:bg-orange-800 transition-colors duration-200">
+          画面外上側から降ってくる
+        </button>
+        <button onClick={handleJumpUp} className="px-4 py-2 bg-teal-700 text-white rounded hover:bg-teal-800 transition-colors duration-100">
+          画面下からジャンプして登場
         </button>
       </div>
     </div>
