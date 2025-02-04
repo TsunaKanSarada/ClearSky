@@ -1,3 +1,5 @@
+// エラー確認時にはHACKコメントを外して利用
+
 import { useEffect } from "react";
 import dbService from "../service/db"; // dbService をインポート
 
@@ -6,7 +8,7 @@ function ErrorLog() {
   useEffect(() => {
     async function runSetup() {
       try {
-        await dbService.setupCollections(); // db の設定実行
+         await dbService.setupCollections(); // db の設定実行
       } catch (error) {
         console.error("Collections setup error:", error); // エラーログ出力
       }
