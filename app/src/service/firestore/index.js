@@ -1,10 +1,8 @@
 import {
   collection,
+  runTransaction, // トランザクションのインポート(中にsetDoc, deleteDocなどが含まれる)
   doc,
-  setDoc,
-  addDoc,
   getDocs,
-  deleteDoc,
   GeoPoint, // 座標データを扱うためのクラス
 } from "firebase/firestore";
 import { db } from "../firebase"; // Firestore の初期化
@@ -59,49 +57,50 @@ const mapName = {
   },
 };
 
-async function setCollections(userId) { // HACK Firebase Authentication の UID
+async function setCollections(userId) {
     try {
-      // 1. users コレクションにドキュメントを作成
+      // ユーザードキュメントの参照を取得
       const userDocRef = doc(db, "users", userId);
-      await setDoc(userDocRef, {
-        userId: userId,
-        name: "Test User",
-        character: 0, // 0: ハムスター, 1: モモンガ, 2: 猫
-        currentRecords: {
-          // currentRecords (map) -> フロントへ最も頻繁に渡すデータ
-          // mapName.Records を展開
-          ...mapName.Records,
-          // mapName.ai を展開
-          ai: mapName.ai,
+  
+      // サブコレクション内のドキュメントは addDoc ではなく、doc()で自動生成したIDを利用
+      const profileDocRef = doc(collection(userDocRef, subCollectionNames.users[0]));
+      const dailyRecordsDocRef = doc(collection(userDocRef, subCollectionNames.users[1]));
+  
+      await runTransaction(db, async (transaction) => {
+        // 1. ユーザードキュメントを作成
+        transaction.set(userDocRef, {
+          userId: userId,
+          name: "Test User",
+          character: 0, // 0: ハムスター, 1: モモンガ, 2: 猫
+          currentRecords: {
+            ...mapName.Records,
+            ai: mapName.ai,
+            updatedAt: new Date(),
+          },
+        });
+  
+        // 2. profile サブコレクションのドキュメントを作成
+        transaction.set(profileDocRef, {
+          birthDate: new Date("1990-01-01"),
+          gender: 0, // 0: 男性, 1: 女性, 2: その他
+          heightCm: 170,
+          weightKg: 65,
+          DrinkingHabit: 1,
+          smokingHabit: 0,
+          registeredAt: new Date(),
           updatedAt: new Date(),
-        },
-      });
+        });
   
-      // 2. profile サブコレクションにドキュメントを作成
-      const profileCollectionRef = collection(userDocRef, subCollectionNames.users[0]);
-      await addDoc(profileCollectionRef, {
-        birthDate: new Date("1990-01-01"),
-        gender: 0, // 0: 男性, 1: 女性, 2: その他
-        heightCm: 170,
-        weightKg: 65,
-        DrinkingHabit: 1, // 0: 飲まない, 1: あまり飲まない, 3: よく飲む, 4: 頻繁に飲む
-        smokingHabit: 0, // 0: 吸わない, 1: あまり吸わない, 3: よく吸う, 4: 頻繁に吸う
-        registeredAt: new Date(),
-        updatedAt: new Date(),
-      });
-  
-      // 3. dailyRecords サブコレクションに日次の履歴ドキュメントを作成（例として1件のみ）
-      const dailyRecordsCollectionRef = collection(userDocRef, subCollectionNames.users[1]);
-      await addDoc(dailyRecordsCollectionRef, {
-        // mapName.Records を展開
-        ...mapName.Records,
-        // mapName.ai を展開
-        ai: mapName.ai,
-        createdDate: new Date(),
+        // 3. dailyRecords サブコレクションのドキュメントを作成
+        transaction.set(dailyRecordsDocRef, {
+          ...mapName.Records,
+          ai: mapName.ai,
+          createdDate: new Date(),
+        });
       });
   
       console.log(
-        `ユーザー "${userId}" に必要なコレクション・サブコレクションを作成しました。`
+        `ユーザー "${userId}" に必要なコレクション・サブコレクションをトランザクションで作成しました。`
       );
     } catch (error) {
       console.error("Error setting up collections:", error);
@@ -111,22 +110,25 @@ async function setCollections(userId) { // HACK Firebase Authentication の UID
 
 // 全てのコレクションを削除
 
-// 指定のドキュメントとそのサブコレクションを再帰的に削除する関数を作成
+// 指定のドキュメントとそのサブコレクションを再帰的に削除する関数
 const deleteDocumentRecursively = async (docRef, subCollectionNames) => {
-  // サブコレクションを取得して削除
-  for (const subColName of subCollectionNames) {
-    const subColRef = collection(docRef, subColName);
-    const subSnapshot = await getDocs(subColRef);
-    const subDeletePromises = subSnapshot.docs.map((subDoc) =>
-      // サブコレクションにさらに深いネストがなければ、空配列を渡して削除
-      deleteDocumentRecursively(subDoc.ref, [])
-    );
-    await Promise.all(subDeletePromises); // サブコレクションの削除を待つ
-
-    console.log(`サブコレクション "${subColName}" を削除します。`, docRef.id);
-  }
-  await deleteDoc(docRef); // 親ドキュメント削除
-};
+    // サブコレクション内のドキュメントを再帰的に削除
+    for (const subColName of subCollectionNames) {
+      const subColRef = collection(docRef, subColName);
+      const subSnapshot = await getDocs(subColRef);
+      const subDeletePromises = subSnapshot.docs.map((subDoc) =>
+        // ネストが無い場合は [] を渡す（必要であれば対象のサブコレクション名を渡す）
+        deleteDocumentRecursively(subDoc.ref, [])
+      );
+      await Promise.all(subDeletePromises);
+      console.log(`サブコレクション "${subColName}" を削除します。`, docRef.id);
+    }
+    
+    // トランザクション内で該当ドキュメントを削除
+    await runTransaction(db, async (transaction) => {
+      transaction.delete(docRef);
+    });
+  };
 
 // 全てのコレクション・サブコレクションを削除
 export const deleteDocuments = async (collectionName) => {
