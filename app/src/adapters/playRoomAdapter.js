@@ -4,7 +4,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase"; // Firestore の初期化
 
-/* DBからのデータ抽出を担うファイル
+/* DBからデータを抽出し、フロントへ届けるファイル
 
 テーブルごとに関数で定義(？)
 DBから必要なデータを抽出し、uiAdapterへ関数として渡す
@@ -20,7 +20,7 @@ DBから必要なデータを抽出し、uiAdapterへ関数として渡す
 ・アシスタントAIの持つユーザーの調子とコメント (assistantAI -> commentAI)
 
 
-~personalArea~
+~assistant~
 
 ・ユーザーのキャラクター情報
 ・アシスタントAIの持つユーザーの調子とコメント
