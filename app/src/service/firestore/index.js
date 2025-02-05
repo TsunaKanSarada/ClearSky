@@ -85,8 +85,8 @@ async function setCollections(userId) {
           gender: 0, // 0: 男性, 1: 女性, 2: その他
           heightCm: 170,
           weightKg: 65,
-          DrinkingHabit: 1,
-          smokingHabit: 0,
+          DrinkingHabit: 1, // 0: なし, 1: ほぼ毎日, 2: 週に数回, 3: 月に数回
+          smokingHabit: 0, // 0: なし, 1: ほぼ毎日, 2: 週に数回, 3: 月に数回
           registeredAt: new Date(),
           updatedAt: new Date(),
         });

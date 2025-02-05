@@ -125,8 +125,8 @@
 | gender        | number    | 性別 (0: 男性, 1: 女性, 2: その他) |
 | heightCm      | number    | 身長 (cm) |
 | weightKg      | number    | 体重 (kg) |
-| drinkingHabit | number    | 飲酒習慣 (0: 飲まない, 1: あまり飲まない, 3: よく飲む, 4: 頻繁に飲む) |
-| smokingHabit | number    | 喫煙習慣 (0: 吸わない, 1: あまり吸わない, 3: よく吸う, 4: 頻繁に吸う) |
+| drinkingHabit | number    | 飲酒習慣 (0: なし, 1: ほぼ毎日, 2: 週に数回, 3: 月に数回) |
+| smokingHabit | number    | 喫煙習慣 (0: なし, 1: ほぼ毎日, 2: 週に数回, 3: 月に数回) |
 | registeredAt  | timestamp | 登録日時 |
 | updatedAt     | timestamp | 最終更新日時 |
 
