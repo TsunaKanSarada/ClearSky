@@ -28,7 +28,7 @@ export const mapName = {
     weather: {
       location: new GeoPoint(35.6895, 139.6917),
       forecastDate: new Date(),
-      weatherCode: 0, // index 0: 晴れ ~ 99: 雷雨
+      weatherCode: 0, // index 0: 快晴 ~ 99: 雷雨
       temperatureMax: 25,
       temperatureMin: 15,
       apparentTemperatureMax: 22, // 体感最高気温

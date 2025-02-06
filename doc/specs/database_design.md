@@ -108,11 +108,38 @@
 
 | フィールド名    | データ型    | 説明 |
 |----------------|-------------|------|
-| location       | geopoint    | 位置情報（天気情報の参照用） |
 | sleepHours     | number      | その日の睡眠時間  |
 | weather        | object      | 天気情報のキャッシュ <br>・forecastDate: timestamp<br>・weatherCode: number<br>・temperatureMax, temperatureMin, etc. |
-| ai             | object      | AI解析結果のキャッシュ <br>【playRoom】ユーザー短文体調コメント（commentAI 結果）<br>【personalArea】アシスタントAIのコメント（assistantAI 結果）<br>【predictionAI】必要な場合：片頭痛レベル (headacheLevel) |
+| ai             | object      | AI解析結果のキャッシュ <br>・commentAI: 短文コメント(体調, 天候) <br>・アシスタントAI: 感情, アドバイス<br>・予測AI：片頭痛レベル |
 | updatedAt      | timestamp   | このキャッシュの更新日時 |
+
+### 埋め込み(map) `weather` (天気情報)
+天気情報の詳細。open-meteoAPIより取得する。
+
+| フィールド名              | データ型   | 説明                              |
+|--------------------------|-----------|---------------------------------|
+| location                 | geopoint  | 測定地点の緯度・経度を表す     　　  |
+| forecastDate             | timestamp | 天気予報が適用される日時            |
+| weatherCode              | number    | 天気コード（0: 快晴 ~ 99: 雷雨）   |
+| temperatureMax           | number    | 最高気温                         |
+| temperatureMin           | number    | 最低気温                         |
+| apparentTemperatureMax   | number    | 最高体感温度                      |
+| apparentTemperatureMin   | number    | 最低体感温度                      |
+| humidity                 | number    | 相対湿度（%）                     |
+| pressure                 | number    | 気圧 (hPa)                       |
+| windSpeed                | number    | 風速 (m/s)                       |
+| uv                       | number    | 紫外線指数 (0: なし ~ 11:非常に強い) |
+
+
+### 埋め込み(map) `ai` (AIデータ)
+3種類のAIの出力結果。
+AI情報はあくまでキャッシュとしての保存に留まるため、mapのネストで格納。
+
+| フィールド名       | データ型    | 説明                                         |
+|--------------------|------------|----------------------------------------------|
+| prediction         | map        | ・headachelevel: number → 偏頭痛レベルの予測値<br>      ・GeneratedDate: timestamp → 予測結果の生成日時  |
+| assistant          | map        | ・emotion: number → キャラクターの感情状態 (index)<br>  ・comment: string → ユーザーへのアドバイスやコメント <br> ・GeneratedDate: timestamp → 予測結果の生成日時 |
+| comment            | map        |  ・weather: string → 天候に関するコメント <br> ・condition: string → ユーザーの体調に関するコメント <br> ・GeneratedDate: timestamp → 予測結果の生成日時  |
 
 ---
 ### サブコレクション: `profile` (★セキュリティ)
@@ -130,13 +157,11 @@
 | registeredAt  | timestamp | 登録日時 |
 | updatedAt     | timestamp | 最終更新日時 |
 
----
 ### サブコレクション: `dailyRecords` (詳細履歴)
 過去の日次記録として保持し、必要に応じた分析や詳細表示に利用。
 
 | フィールド名 | データ型  | 説明 |
 |--------------|-----------|------|
-| location     | geopoint  | 位置情報 |
 | sleepHours   | number    | 睡眠時間 |
 | weather      | object    | 埋め込み天気情報（詳細履歴用） |
 | ai           | object    | 当日のAI解析結果（prediction, assistant, comment の各結果） |
