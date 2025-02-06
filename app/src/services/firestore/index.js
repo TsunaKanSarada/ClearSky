@@ -22,7 +22,7 @@ export const subCollectionNames = {
 };
 
 // map部分を共通化
-export const mapName = { 
+export const commonMap = { 
   Records: { // currentRecordsとdailyRecordsの共通フィールド
     sleepHours: 8,
     weather: {
@@ -75,8 +75,8 @@ export async function setCollections(userId) {
           name: "Test User",
           character: 0, // 0: ハムスター, 1: モモンガ, 2: 猫
           currentRecords: {
-            ...mapName.Records,
-            ai: mapName.ai,
+            ...commonMap.Records,
+            ai: commonMap.ai,
             updatedAt: new Date(),
           },
         });
@@ -95,8 +95,8 @@ export async function setCollections(userId) {
   
         // 3. dailyRecords サブコレクションのドキュメントを作成
         transaction.set(dailyRecordsDocRef, {
-          ...mapName.Records,
-          ai: mapName.ai,
+          ...commonMap.Records,
+          ai: commonMap.ai,
           createdDate: new Date(),
         });
       });

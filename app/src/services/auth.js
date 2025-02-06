@@ -62,7 +62,7 @@ export const signOutUser = () => {
         });
 };
 
-// 現在のユーザーの UID を取得する関数 (DBへuserIdを格納)
+// 現在のユーザーの UID を取得する関数
 export const getCurrentUserUID = () => {
     const user = auth.currentUser;
     if (!user) {
