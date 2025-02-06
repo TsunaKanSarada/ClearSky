@@ -20,7 +20,6 @@
 　       ├── name (string)
 　       ├── character (number)
 　       ├── currentRecords (map)
-　       │   ├── location (geopoint)
 　       │   ├── sleepHours (number)
 　       │   ├── weather (map)
 　       │   │   ├── location (geopoint)
@@ -32,7 +31,8 @@
 　       │   │   ├── apparentTemperatureMin (number)
 　       │   │   ├── humidity (number)
 　       │   │   ├── pressure (number)
-　       │   │   └── windSpeed (number)
+　       │   │   ├── windSpeed (number)
+　       │   │   └── uv (number)
 　       │   ├── ai (map)
 　       │   │   ├── prediction (map)
 　       │   │   │   ├── headacheLevel (number)
@@ -58,7 +58,6 @@
 　       │   └── updatedAt  (timestamp)
 　       │
 　       └── dailyRecords (サブコレクション)
-　           ├── location (geopoint)
 　           ├── sleepHours (number)
 　           ├── weather (map)
 　           │   ├── location (geopoint)
@@ -70,7 +69,8 @@
 　           │   ├── apparentTemperatureMin (number)
 　           │   ├── humidity (number)
 　           │   ├── pressure (number)
-　           │   └── windSpeed (number)
+　           │   ├── windSpeed (number)
+　           │   └── uv (number)
 　           ├── ai (map)
 　           │　  ├── prediction (map)
 　           │　  │   ├── headacheLevel (number)
@@ -159,7 +159,6 @@ flowchart LR
     UserDoc --> CR["currentRecords (map)"]
 
     %% currentRecords inner fields
-    CR --> CR_Loc["location (geopoint)"]
     CR --> CR_Sleep["sleepHours (number)"]
     
     %% currentRecords -> weather (map)
@@ -174,6 +173,7 @@ flowchart LR
     CR_Weather --> CRW_Hum["humidity (number)"]
     CR_Weather --> CRW_Press["pressure (number)"]
     CR_Weather --> CRW_Wind["windSpeed (number)"]
+    CR_Weather --> CRW_UV["uv (number)"]
 
     %% currentRecords -> ai (map)
     CR --> CR_AI["ai (map)"]
@@ -211,7 +211,6 @@ flowchart LR
 
     %% dailyRecords Subcollection
     UserDoc --> Daily["dailyRecords (サブコレクション)"]
-    Daily --> D_Loc["location (geopoint)"]
     Daily --> D_Sleep["sleepHours (number)"]
     
     %% dailyRecords -> weather (map)
@@ -226,6 +225,7 @@ flowchart LR
     D_Weather --> D_Hum["humidity (number)"]
     D_Weather --> D_Press["pressure (number)"]
     D_Weather --> D_Wind["windSpeed (number)"]
+    D_Weather --> D_UV["uv (number)"]
 
     %% dailyRecords -> ai (map)
     Daily --> D_AI["ai (map)"]
@@ -267,3 +267,6 @@ flowchart LR
   * `ai` -> `assistantAI`, `commentAI`サブコレクションを追記  
 * 2025/02/05: 第3版作成  
   * 様々な要件を整理し、NoSQLデータベースへ最適化
+* 2025/02/06: 第4版作成
+  * `weather`情報(map)に`uv`を追加
+  * `~Records`情報(map)`location`の冗長化を一部解消

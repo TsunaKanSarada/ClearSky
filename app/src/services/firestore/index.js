@@ -1,3 +1,5 @@
+/* DBの初期設定やコレクション生成・削除関数*/
+
 import {
   collection,
   runTransaction, // トランザクションのインポート(中にsetDoc, deleteDocなどが含まれる)
@@ -5,7 +7,7 @@ import {
   getDocs,
   GeoPoint, // 座標データを扱うためのクラス
 } from "firebase/firestore";
-import { db } from "../firebase"; // Firestore の初期化
+import { db } from "../firebase"; // Firestoreのインポート
 
 // 認証ユーザーの UID を取得する処理
 import { getCurrentUserUID } from "../auth";
@@ -14,15 +16,14 @@ const uid = getCurrentUserUID();
 
 // コレクション, フィールドを定義
 // コレクション名称を定義
-const collectionName = "users";
-const subCollectionNames = {
+export const collectionName = "users";
+export const subCollectionNames = {
   users: ["profile", "dailyRecords"],
 };
 
 // map部分を共通化
-const mapName = { 
+export const mapName = { 
   Records: { // currentRecordsとdailyRecordsの共通フィールド
-    location: new GeoPoint(35.6895, 139.6917),
     sleepHours: 8,
     weather: {
       location: new GeoPoint(35.6895, 139.6917),
@@ -35,6 +36,7 @@ const mapName = {
       humidity: 60,
       pressure: 1013,
       windSpeed: 3,
+      uv: 5 // 紫外線 0: なし ~ 11: 非常に強い
     },
   },
   ai: {
@@ -57,7 +59,7 @@ const mapName = {
   },
 };
 
-async function setCollections(userId) {
+export async function setCollections(userId) {
     try {
       // ユーザードキュメントの参照を取得
       const userDocRef = doc(db, "users", userId);
