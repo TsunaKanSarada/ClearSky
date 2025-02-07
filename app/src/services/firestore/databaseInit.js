@@ -6,6 +6,7 @@ import {
   doc,
   getDocs,
   GeoPoint, // 座標データを扱うためのクラス
+  Timestamp, // Firestoreの日付データを扱うためのクラス
 } from "firebase/firestore";
 import { db } from "../firebase"; // Firestoreのインポート
 
@@ -60,55 +61,57 @@ export const commonMap = {
 };
 
 export async function setCollections(userId) {
-    try {
-      // ユーザードキュメントの参照を取得
-      const userDocRef = doc(db, "users", userId);
-  
-      // サブコレクション内のドキュメントは addDoc ではなく、doc()で自動生成したIDを利用
-      const profileDocRef = doc(collection(userDocRef, subCollectionNames.users[0]));
-      const dailyRecordsDocRef = doc(collection(userDocRef, subCollectionNames.users[1]));
-  
-      await runTransaction(db, async (transaction) => {
-        // 1. ユーザードキュメントを作成
-        transaction.set(userDocRef, {
-          userId: userId,
-          name: "Test User",
-          character: 0, // 0: ハムスター, 1: モモンガ, 2: 猫
-          currentRecords: {
-            ...commonMap.Records,
-            ai: commonMap.ai,
-            updatedAt: new Date(),
-          },
-        });
-  
-        // 2. profile サブコレクションのドキュメントを作成
-        transaction.set(profileDocRef, {
-          birthDate: new Date("1990-01-01"),
-          gender: 0, // 0: 男性, 1: 女性, 2: その他
-          heightCm: 170,
-          weightKg: 65,
-          DrinkingHabit: 1, // 0: なし, 1: ほぼ毎日, 2: 週に数回, 3: 月に数回
-          smokingHabit: 0, // 0: なし, 1: ほぼ毎日, 2: 週に数回, 3: 月に数回
-          registeredAt: new Date(),
-          updatedAt: new Date(),
-        });
-  
-        // 3. dailyRecords サブコレクションのドキュメントを作成
+  try {
+    const userDocRef = doc(db, "users", userId);
+    const profileDocRef = doc(userDocRef, subCollectionNames.users[0], "profileDoc");
+    const dailyRecordsDocRef = doc(collection(userDocRef, subCollectionNames.users[1]));
+    const today = new Date();
+    today.setHours(0,0,0,0); // 今日の0時0分0秒にする
+
+    await runTransaction(db, async (transaction) => {
+      // 1. ユーザードキュメントを作成
+      transaction.set(userDocRef, {
+        userId: userId,
+        name: "Test User",
+        character: 0,
+        currentRecords: { // currentRecords は初期化データとしては最小限にしておく
+          weather: { // 最新の天気情報くらいは持っておく
+              location: commonMap.Records.weather.location,
+              forecastDate: Timestamp.fromDate(commonMap.Records.weather.forecastDate),
+          }
+        },
+      });
+
+      // 2. profile サブコレクションのドキュメントを作成 (変更なし)
+      transaction.set(profileDocRef, {
+        birthDate: new Date("1990-01-01"),
+        gender: 0,
+        heightCm: 170,
+        weightKg: 65,
+        DrinkingHabit: 1,
+        smokingHabit: 0,
+        registeredAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+        // 3. dailyRecords サブコレクションのドキュメントを作成 (修正)
         transaction.set(dailyRecordsDocRef, {
-          ...commonMap.Records,
+          createdDate: Timestamp.fromDate(today),
+          weather: commonMap.Records.weather,
           ai: commonMap.ai,
-          createdDate: new Date(),
+          sleepHours: 8, // sleepHours の初期値を設定
+          updatedAt: Timestamp.fromDate(today),
         });
       });
-  
-      console.log(
-        `ユーザー "${userId}" に必要なコレクション・サブコレクションをトランザクションで作成しました。`
-      );
-    } catch (error) {
-      console.error("Error setting up collections:", error);
-      throw error;
-    }
+
+    console.log(
+      `ユーザー "${userId}" に必要なコレクション・サブコレクションをトランザクションで作成しました。`
+    );
+  } catch (error) {
+    console.error("Error setting up collections:", error);
+    throw error;
   }
+}
 
 // 全てのコレクションを削除
 
