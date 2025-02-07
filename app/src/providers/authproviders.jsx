@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { createContext, useContext, useEffect, useState } from "react";
-import { auth } from "../service/firebase";
+import { auth } from "../services/firebase";
 
 const AuthContext = createContext();
 
