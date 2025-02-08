@@ -167,6 +167,11 @@ AI情報はあくまでキャッシュとしての保存に留まるため、map
 | ai           | object    | 当日のAI解析結果（prediction, assistant, comment の各結果） |
 | createdDate  | timestamp | 記録作成日時 |
 
+#### `commentAI`サブコレクション -> 短文コメントAI
+| フィールド名 | データ型 | 説明 |
+|---|---|---|
+| weather | string | 気象情報に対してのコメント | -> infoページに表示
+| condition | String | ユーザーの体調コメント | -> playRoomページに表示
 
 ## 4. データ構造図
 
@@ -282,6 +287,7 @@ flowchart LR
 * セキュリティルール: 各コレクションに対して、Firebase Authentication を使用したアクセス制御を行う。
 
 
+## ６. 更新履歴
 ## ６. 更新履歴
 
 * 2024/02/03: 初版作成
