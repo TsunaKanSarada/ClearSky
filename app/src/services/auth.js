@@ -7,6 +7,7 @@ import {
 } from "firebase/auth";
 import { auth } from "./firebase";
 
+// メールアドレスとパスワードでユーザー登録
 export const signUpWithEmail = (email, password) => {
     return createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
@@ -20,6 +21,7 @@ export const signUpWithEmail = (email, password) => {
         });
 };
 
+// メールアドレスとパスワードでサインイン
 export const signInWithEmail = (email, password) => {
     return signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
@@ -33,6 +35,7 @@ export const signInWithEmail = (email, password) => {
         });
 };
 
+// Googleアカウントでサインイン
 export const signInWithGoogle = () => {
     const provider = new GoogleAuthProvider();
     return signInWithPopup(auth, provider)
@@ -47,6 +50,7 @@ export const signInWithGoogle = () => {
         });
 };
 
+// ユーザーのサインアウト
 export const signOutUser = () => {
     return signOut(auth)
         .then(() => {
@@ -57,3 +61,13 @@ export const signOutUser = () => {
             throw error;
         });
 };
+
+// 現在のユーザーの UID を取得する関数
+export const getCurrentUserUID = () => {
+    const user = auth.currentUser;
+    if (!user) {
+      console.warn("ユーザーがサインインしていません。");
+      return null;
+    }
+    return user.uid;
+  };
