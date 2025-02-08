@@ -41,7 +41,7 @@ await createUserDocument();
 ```javascript
 const profileData = {
   name: '山田太郎',
-  character: 0, // 0: ハムスター, 1: モモンガ, 2: 猫
+  character: 0, // 1: ハムスター, 2: 猫, 3: 犬, 4: ペンギン, 5: モモンガ, 6: コアラ, 7: うさぎ, 8: パンダ
   birthDate: new Date('1995-04-10'),
   gender: 0, // 0: 男性, 1: 女性, 2: その他
   heightCm: 175,
@@ -307,7 +307,7 @@ console.log(characterInfo); // 例: {character: 1}
 **戻り値:**
 
 * `Promise<{character: number}>`: キャラクター番号を含むオブジェクト。
-    * `character` (number): キャラクター番号 (0: ハムスター, 1: モモンガ, 2: 猫)。
+    * `character` (number): キャラクター番号 (1: ハムスター, 2: 猫, 3: 犬, 4: ペンギン, 5: モモンガ, 6: コアラ, 7: うさぎ, 8: パンダ)。
 
 **エラー処理:**
 

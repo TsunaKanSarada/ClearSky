@@ -99,7 +99,7 @@
 |------------|---------|-----|
 | userId     | string  | Firebase Authentication の UID |
 | name       | string  | ユーザー名 |
-| character  | number  | キャラクター (0: ハムスター, 1: モモンガ, 2: 猫) |
+| character  | number  | キャラクター (1: ハムスター, 2: 猫, 3: 犬, 4: ペンギン, 5: モモンガ, 6: コアラ, 7: うさぎ, 8: パンダ) |
 
 ---
 ### 埋め込み(map) `currentRecords` (最新日次記録)

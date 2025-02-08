@@ -394,7 +394,7 @@ export async function storeCommentData(commentData) {
  *
  * @async
  * @function getCharacterInfo
- * @returns {Promise<{character: number}>} キャラクター番号を含むオブジェクト。
+ * @returns {Promise<{character: number}>} キャラクター番号を含むオブジェクト(1: ハムスター, 2: 猫, 3: 犬, 4: ペンギン, 5: モモンガ, 6: コアラ, 7: うさぎ, 8: パンダ)
  * @throws {Error} ユーザーIDが取得できない場合、またはユーザードキュメントが存在しない場合にエラーをスローします。
  */
 export async function getCharacterInfo() {
