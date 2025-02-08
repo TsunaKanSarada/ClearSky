@@ -1,7 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 
 // 吹き出しコンポーネント（指定したメッセージを順次表示）
-// ※今回は container 内で使うので、クラス名はオーバーライド可能にしています
 const SpeechBubble = ({ messages, interval = 3000, className = '' }) => {
   const [index, setIndex] = useState(0);
 
@@ -13,7 +13,7 @@ const SpeechBubble = ({ messages, interval = 3000, className = '' }) => {
   }, [messages, interval]);
 
   return (
-    <div className={`bg-white w-40 py-2 rounded-lg shadow-md text-sm ${className} text-center`}>
+    <div className={`bg-white w-40 py-2 rounded-lg shadow-md text-sm text-pink-500 ${className} text-center`}>
       {messages[index]}
     </div>
   );
@@ -49,10 +49,11 @@ const AnimatedImages = ({
       y: Math.random() * (window.innerHeight - imageSize),
       angle: Math.random() * 2 * Math.PI, // 0～2π のランダム角度
       speed: speed,
-      isHappy: false,    // 衝突時に一時的に true にする
-      happyStart: null,  // happy 状態開始時刻（ms）
+      isHappy: false,         // 衝突時に一時的に true にする
+      happyStart: null,       // happy 状態開始時刻（ms）
       collisionPausedUntil: null,  // 衝突判定を一時停止する期限（ms）
-      escapeAngle: null, // 衝突後に歩いて離れる方向（ラジアン）
+      escapeAngle: null,      // 衝突後に歩いて離れる方向（ラジアン）
+      collisionAnimation: null, // 衝突時のアニメーションクラス（後でランダム設定）
       nextTurn: performance.now() + (Math.random() * 7000 + 3000) // 次のランダムターンのタイミング（3～10秒後）
     }))
   );
@@ -67,13 +68,14 @@ const AnimatedImages = ({
         // 各画像の状態更新
         const newStates = prevStates.map(img => {
           if (img.isHappy) {
-            // happy 状態中は移動は停止し、happyDuration 経過後に逃げる方向へ切替え
+            // happy 状態中は移動停止。happyDuration 経過後に通常状態へ戻す
             if (now - img.happyStart >= happyDuration) {
               return {
                 ...img,
                 isHappy: false,
                 happyStart: null,
-                // escapeAngle があればその方向に、なければランダムな方向に切り替え
+                collisionAnimation: null, // 衝突アニメーションの解除
+                // escapeAngle があればその方向に、なければランダムな方向に切替え
                 angle: img.escapeAngle !== null ? img.escapeAngle : Math.random() * 2 * Math.PI,
                 escapeAngle: null,
                 collisionPausedUntil: now + collisionPauseDuration
@@ -81,7 +83,7 @@ const AnimatedImages = ({
             }
             return img;
           } else {
-            // collisionPausedUntil が設定され、まだその期間内なら解除はしない
+            // collisionPausedUntil が設定され、まだその期間内ならそのまま
             let newCollisionPausedUntil = img.collisionPausedUntil;
             if (img.collisionPausedUntil && now >= img.collisionPausedUntil) {
               newCollisionPausedUntil = null;
@@ -91,7 +93,7 @@ const AnimatedImages = ({
             let newNextTurn = img.nextTurn;
             if (now >= img.nextTurn) {
               // 0～90°のランダムな角度変化（左右どちらかの方向）
-              let delta = Math.random() * (180 * Math.PI / 180);
+              let delta = Math.random() * (Math.PI / 2);
               if (Math.random() < 0.5) delta = -delta;
               newAngle = img.angle + delta;
               newNextTurn = now + (Math.random() * 7000 + 3000); // 次回は3～10秒後
@@ -126,6 +128,12 @@ const AnimatedImages = ({
         });
 
         // 衝突判定（collisionPaused 中でない画像同士）
+        // 衝突時は、3種類のアニメーションのうちランダムなものを割り当てる
+        const randomCollisionAnimation = () => {
+          const animations = ['animate-collision1', 'animate-collision2', 'animate-collision3'];
+          return animations[Math.floor(Math.random() * animations.length)];
+        };
+
         for (let i = 0; i < newStates.length; i++) {
           for (let j = i + 1; j < newStates.length; j++) {
             const img1 = newStates[i];
@@ -143,11 +151,23 @@ const AnimatedImages = ({
               const dy = center1Y - center2Y;
               const distance = Math.sqrt(dx * dx + dy * dy);
               if (distance < imageSize) {
-                // 衝突発生 → 各画像の逃げる方向を計算して happy 状態にする
+                // 衝突発生 → 各画像の逃げる方向を計算し、ランダムな衝突アニメーションを設定
                 const escapeAngle1 = Math.atan2(dy, dx);   // img1は img2 から離れる方向
                 const escapeAngle2 = Math.atan2(-dy, -dx);   // img2は img1 から離れる方向
-                newStates[i] = { ...img1, isHappy: true, happyStart: now, escapeAngle: escapeAngle1 };
-                newStates[j] = { ...img2, isHappy: true, happyStart: now, escapeAngle: escapeAngle2 };
+                newStates[i] = { 
+                  ...img1, 
+                  isHappy: true, 
+                  happyStart: now, 
+                  escapeAngle: escapeAngle1,
+                  collisionAnimation: randomCollisionAnimation()
+                };
+                newStates[j] = { 
+                  ...img2, 
+                  isHappy: true, 
+                  happyStart: now, 
+                  escapeAngle: escapeAngle2,
+                  collisionAnimation: randomCollisionAnimation()
+                };
               }
             }
           }
@@ -169,7 +189,7 @@ const AnimatedImages = ({
           className="absolute"
           style={{ left: img.x, top: img.y, width: imageSize, height: imageSize }}
         >
-          {/* 吹き出しをキャラクターの上に配置（例：画像上から -30px の位置） */}
+          {/* 吹き出しをキャラクターの上に配置 */}
           <SpeechBubble 
             messages={commentMessages}
             interval={3000}
@@ -178,7 +198,11 @@ const AnimatedImages = ({
           <img
             src={img.src}
             alt=""
-            className={`transition-transform duration-500 ${img.isHappy ? 'scale-150' : 'scale-100 animate-poyon'}`}
+            className={`transition-transform duration-500 ${
+              img.isHappy
+                ? (img.collisionAnimation || 'scale-150')
+                : 'scale-100 animate-poyon'
+            }`}
             style={{
               width: imageSize,
               height: imageSize
@@ -194,32 +218,62 @@ const AnimatedImages = ({
 const Chat = () => {
   const commentMessages = ['こんにちは！', '元気ですか？', 'さようなら！'];
   const images = [
-    'https://msp.c.yimg.jp/images/v2/FUTi93tXq405grZVGgDqG3Q-qO3Ex-xMeBkSngVVmoxjFHxlG6smKTX2zBZ360I9LuVSrtDTEUHrjhGg-CYviE98O_oE5yiiddbXnUijtS5peMDKm554I-E_z7DHwRq4b7ULZAhc97mTmjo4GlSiBoi47Q9_dMNTFeUEqY3TNl1iqnqI9Yz5Fl7z6g_2UzP1D9bUkGhgtxocv8lO8P4d-WhOPlvbjxAe-g_GQ_t4p8zSnPBmOW99CtfRZ-TykUPcW2fM9D1ncBWwPwqdF6k_cNmNbOnzCccap3xegQfdiQIRomm_Of5MP3HY8ByEGBpgFj0oPRn1ozXQtp2-VZI4KDBN5iZF48jAeJtPUTD3EoCH9rbwoSNVslwwVexoflmhAMARZWYF7WAt8tooib37P8XVrZNhdmQufVnS2qKXbl4=/32095393_1000_0.jpeg?errorImage=false',
+    'images/1.png',
     'https://msp.c.yimg.jp/images/v2/FUTi93tXq405grZVGgDqGx3lkZSjyeBCfNRaWv814q3sjF0XGskROvrQzmV-skw38xPhvOOa8YokQ0h9FkFsJsO7xemoXyeCPviNTbLRJIsWP-KZB2zdOzqLulms2dCKG-Orhs_3m-aHzZqRuktp5xXN4PuvyfgN2gqFMZ3j7i9wvScTSIm_bI3upwCixwKa7PfBGj5h_aBppwZkH7cDhkqB5haO23jB3ObqiBs3IQJGdU1V2-11ttbA9ywa686b9O15wed-1FDFdJG68e6V7ls_bXW-Sl7LCQD7QRipkqx28w0siE5bz1nbsB10FNOt06tOUotJt0Bu0OPtIdPiSfF6SRVIsJ_NbxYiLv_-eMkd5ZGUo8ngQnzUWlr_NeKt7IxdFxrJETr60M5lfrJMN_MT4bzjmvGKJENIfRZBbCbDu8XpqF8ngj74jU2y0SSLFj_imQds3Ts6i7pZrNnQihvjq4bP95vmh82akbpLaecVzeD7r8n4DdoKhTGd4-4vcL0nE0iJv2yN7qcAoscCmuz3wRo-Yf2gaacGZB-3A4ZKgeYWjtt4wdzm6ogbNyECRnVNVdvtdbbWwPcsGuvOm_TtecHnftRQxXSRuvHule5bP211vkpeywkA-0EYqZKsdvMNLIhOW89Z27AddBTTrdOrTlKLSbdAbtDj7SHT4kmDZNRaifXhNCs_BugWVA5o/E381ADE38193E38195E38293-E381BBE381BBE38188E381BFE381AEE8A1A8E68385-1024x1024.png?errorImage=false',
     'https://thumb.ac-illust.com/09/090cd61d1f5d3c8877455f89d1c74713_t.jpeg'
   ];
 
   return (
     <div className="relative w-full h-screen bg-[url('https://aomaterial.com/wp-content/uploads/2024/06/cfbb2be920e3fce05ad2f650e22d713f.png')] overflow-hidden ">
-        <style>
+      <style>
         {`
-        @keyframes poyon {
-            0%   { transform: scale(1.0, 1.0) translate(0%, 0%); }
-            15%  { transform: scale(0.9, 0.9) translate(0%, 5%); }
+          @keyframes poyon {
+            0%   { transform: scale(1.0) translate(0%, 0%); }
+            15%  { transform: scale(0.9) translate(0%, 5%); }
             30%  { 
-                    /* 複数の transform 指定がある場合は、最終的な指定が有効になるので注意 */
-                    transform: scale(1.3, 0.8) translate(0%, 10%) translateY(-20px); 
+                  /* 複数の transform 指定がある場合は、最終的な指定が有効になります */
+                  transform: scale(1.3) translate(0%, 10%) translateY(-20px); 
                 }
-            50%  { transform: scale(0.85, 1.2) translate(0%, -10%); }
-            70%  { transform: scale(1.05, 0.95) translate(0%, 5%); }
-            100% { transform: scale(1.0, 1.0) translate(0%, 0%); }
-            }
-
-            .animate-poyon {
+            50%  { transform: scale(0.85) translate(0%, -10%); }
+            70%  { transform: scale(1.05) translate(0%, 5%); }
+            100% { transform: scale(1.0) translate(0%, 0%); }
+          }
+          .animate-poyon {
             animation: poyon 1.5s ease infinite;
-            }
+          }
+          /* 衝突時のアニメーションバリエーション１：シェイク＋回転 */
+          @keyframes collision1 {
+            0%   { transform: scale(1.2) rotate(0deg); }
+            25%  { transform: scale(1.3) rotate(5deg); }
+            50%  { transform: scale(1.2) rotate(-5deg); }
+            75%  { transform: scale(1.3) rotate(5deg); }
+            100% { transform: scale(1.2) rotate(0deg); }
+          }
+          .animate-collision1 {
+            animation: collision1 0.8s ease-in-out;
+          }
+          /* 衝突時のアニメーションバリエーション２：バウンス */
+          @keyframes collision2 {
+            0%   { transform: scale(1); }
+            50%  { transform: scale(1.5); }
+            100% { transform: scale(1); }
+          }
+          .animate-collision2 {
+            animation: collision2 0.8s ease-in-out;
+          }
+          /* 衝突時のアニメーションバリエーション３：左右ウィグル */
+          @keyframes collision3 {
+            0%   { transform: translateX(0); }
+            25%  { transform: translateX(-10px); }
+            50%  { transform: translateX(10px); }
+            75%  { transform: translateX(-10px); }
+            100% { transform: translateX(0); }
+          }
+          .animate-collision3 {
+            animation: collision3 0.8s ease-in-out;
+          }
         `}
-    </style>
+      </style>
       <AnimatedImages 
         images={images} 
         speed={25} 

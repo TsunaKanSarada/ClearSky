@@ -1,6 +1,10 @@
 import React from 'react';
 
 const RotatingImage = () => {
+  // 1から8までのランダムな数値を生成
+  const randomImageNumber = Math.floor(Math.random() * 8) + 1;
+  const imagePath = `/images/${randomImageNumber}.png`;
+
   return (
     <div className="rotating-container">
       <style jsx>{`
@@ -24,7 +28,7 @@ const RotatingImage = () => {
         }
       `}</style>
       <img 
-        src="/images/AI.png" 
+        src={imagePath} 
         alt="Rotating" 
         className="rotating-image animate-spin" 
       />

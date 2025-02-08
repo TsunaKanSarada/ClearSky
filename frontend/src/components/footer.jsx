@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import assistant from "/images/AI.png";
+import assistant from "/images/1.png";
 import { Home, Sun } from "lucide-react"; // Home: おうち, Sun: 天気
 
 const Footer = () => {

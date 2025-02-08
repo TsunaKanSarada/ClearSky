@@ -29,12 +29,16 @@ const Info = () => {
   const [dailyData, setDailyData] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
-  const [deviceWidth, setDeviceWidth] = React.useState(window.innerWidth);
 
-  // ウィンドウサイズの変更監視
+  // デバイスの横幅と高さを state に持つ
+  const [deviceWidth, setDeviceWidth] = React.useState(window.innerWidth);
+  const [deviceHeight, setDeviceHeight] = React.useState(window.innerHeight);
+
+  // ウィンドウサイズの変更を監視して、横幅と高さを更新
   React.useEffect(() => {
     const handleResize = () => {
       setDeviceWidth(window.innerWidth);
+      setDeviceHeight(window.innerHeight);
     };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -115,7 +119,8 @@ const Info = () => {
   const pressureData = dailyData.map((day) => day.pressure);
 
   return (
-    <div style={{ width: `${deviceWidth}px` }} className="mx-auto">
+    // 外側コンテナは横幅だけデバイスサイズに合わせています
+    <div className="mx-auto" style={{ width: `${deviceWidth}px` }}>
       {loading && <Loading />}
       {error && (
         <p className="text-red-600">エラーが発生しました: {error.message}</p>
@@ -124,40 +129,49 @@ const Info = () => {
 
       {!loading && !error && dailyData.length > 0 && (
         <>
-          {/* 天気情報の UI */}
-          <div className="flex w-full mb-4">
-            {dailyData.map((day) => (
-              <div
-                key={day.date}
-                className="flex-1 border border-gray-300 rounded px-1 py-1 flex flex-col items-center"
-              >
-                <div className="w-full text-center text-xs border-b border-gray-300 pb-1">
-                  {day.formattedDate}
-                </div>
-                <div className="flex flex-col items-center justify-center pt-1">
-                  <span className="text-lg">{getWeatherIcon(day.weathercode)}</span>
-                  <span className="text-xs mb-1">
-                    <span className="text-red-500">{day.temperature_max}°</span>/
-                    <span className="text-blue-500">{day.temperature_min}°</span>
-                  </span>
-                  <div className="text-center">
-                    <div className="text-[8.8px]">体感温度</div>
-                    <span className="text-xs mb-1">
-                      <span className="text-red-500">{day.apparent_temperature_max}°</span>/
-                      <span className="text-blue-500">{day.apparent_temperature_min}°</span>
-                    </span>
+          {/* 天気情報のコンテナ：横幅は deviceWidth の100%、高さは deviceHeight の30% */}
+          <div
+            style={{
+              width: `${deviceWidth}px`,
+              height: `$200px`,
+            }}
+          >
+            <div className="flex w-full h-full mb-4">
+              {dailyData.map((day) => (
+                <div
+                  key={day.date}
+                  className="flex-1 border border-gray-300 rounded px-1 py-1 flex flex-col items-center"
+                >
+                  <div className="w-full text-center text-xs border-b border-gray-300 pb-1">
+                    {day.formattedDate}
                   </div>
-                  <span className="text-[9px]">☔ {day.precipitation}%</span>
-                  <span className="text-[9px]">💧 {day.humidity}%</span>
-                  <span className="text-[9px]">🍃 {day.wind_speed}m/s</span>
-                  <span className="text-[9px]">🔆 {day.uv_index_percent}%</span>
+                  <div className="flex flex-col items-center justify-center pt-1">
+                    <span className="text-lg">{getWeatherIcon(day.weathercode)}</span>
+                    <span className="text-xs mb-1">
+                      <span className="text-red-500">{day.temperature_max}°</span>/
+                      <span className="text-blue-500">{day.temperature_min}°</span>
+                    </span>
+                    <div className="text-center">
+                      <div className="text-[10px]">体感温度</div>
+                      <span className="text-xs mb-1">
+                        <span className="text-red-500">{day.apparent_temperature_max}°</span>/
+                        <span className="text-blue-500">{day.apparent_temperature_min}°</span>
+                      </span>
+                    </div>
+                    <span className="text-[10px]">☔ {day.precipitation}%</span>
+                    <span className="text-[10px]">💧 {day.humidity}%</span>
+                    <span className="text-[10px]">🍃 {day.wind_speed}m</span>
+                    <span className="text-[10px]">🔆 {day.uv_index_percent}%</span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
-          {/* SleepChart コンポーネントに気圧データを渡して表示 */}
-          <SleepChart pressureData={pressureData} />
+          {/* SleepChart コンポーネント（高さはお好みで調整してください） */}
+          <div style={{ height: "35%" }}>
+            <SleepChart pressureData={pressureData} />
+          </div>
         </>
       )}
     </div>
