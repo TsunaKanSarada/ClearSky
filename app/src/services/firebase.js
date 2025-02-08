@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth"; // Authentication
 import { getFirestore } from "firebase/firestore"; // Firestore
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "firebase/app-check"; // App Check
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -19,3 +20,9 @@ export const auth = getAuth(app);
 
 // Firestore サービスの初期化
 export const db = getFirestore(app);
+
+// App Check サービスの初期化
+export const appCheck = initializeAppCheck(app, { // reCAPTCHAキー
+    provider: new ReCaptchaEnterpriseProvider(/* 6Ldd59AqAAAAAC0Nurmy4JrdHYA4YnaxD7V9EpHI */),
+    isTokenAutoRefreshEnabled: true // 自動更新を許可
+  });
