@@ -739,29 +739,29 @@ console.log(latestComments);
 *   `createdDate`: レコード作成日時 (Date オブジェクトまたは null)。
     *   `sleepHours`: 睡眠時間 (数値または null)。
     *   `weather`: 天気情報オブジェクト (または null)。
-    *     - `location`: 位置情報 (GeoPoint オブジェクトまたは null)。
-    *     - `forecastDate`: 予報日 (Date オブジェクトまたは null)。
-    *     - `weatherCode`: 天気コード (数値または null)。
-    *     - `temperatureMax`: 最高気温 (数値または null)。
-    *     - `temperatureMin`: 最低気温 (数値または null)。
-    *     - `apparentTemperatureMax`: 体感最高気温 (数値または null)。
-    *     - `apparentTemperatureMin`: 体感最低気温 (数値または null)。
-    *     - `humidity`: 湿度 (数値または null)。
-    *     - `pressure`: 気圧 (数値または null)。
-    *     - `windSpeed`: 風速 (数値または null)。
-    *     - `uv`: UVインデックス (数値または null)。
-    *   - `ai`: AI関連情報オブジェクト (または null)。
-    *     - `prediction`: 頭痛予測オブジェクト (または null)。
-    *       - `headacheLevel`: 頭痛レベル (数値または null)。
-    *       - `GeneratedDate`: 予測生成日時 (Date オブジェクトまたは null)。
-    *     - `assistant`: AIアシスタント情報オブジェクト (または null)。
-    *       - `emotion`: AIアシスタントの感情 (数値または null)。
-    *       - `comment`: AIアシスタントのコメント (文字列または null)。
-    *       - `GeneratedDate`: コメント生成日時 (Date オブジェクトまたは null)。
-    *     - `comment`: AIコメントオブジェクト (または null)。
-    *       - `weather`: 天気に関するコメント (文字列または null)。
-    *       - `condition`: 体調に関するコメント (文字列または null)。
-    *       - `GeneratedDate`: コメント生成日時 (Date オブジェクトまたは null)。
+          - `location`: 位置情報 (GeoPoint オブジェクトまたは null)。
+          - `forecastDate`: 予報日 (Date オブジェクトまたは null)。
+          - `weatherCode`: 天気コード (数値または null)。
+          - `temperatureMax`: 最高気温 (数値または null)。
+          - `temperatureMin`: 最低気温 (数値または null)。
+          - `apparentTemperatureMax`: 体感最高気温 (数値または null)。
+          - `apparentTemperatureMin`: 体感最低気温 (数値または null)。
+          - `humidity`: 湿度 (数値または null)。
+          - `pressure`: 気圧 (数値または null)。
+          - `windSpeed`: 風速 (数値または null)。
+          - `uv`: UVインデックス (数値または null)。
+        - `ai`: AI関連情報オブジェクト (または null)。
+          - `prediction`: 頭痛予測オブジェクト (または null)。
+            - `headacheLevel`: 頭痛レベル (数値または null)。
+            - `GeneratedDate`: 予測生成日時 (Date オブジェクトまたは null)。
+          - `assistant`: AIアシスタント情報オブジェクト (または null)。
+            - `emotion`: AIアシスタントの感情 (数値または null)。
+            - `comment`: AIアシスタントのコメント (文字列または null)。
+            - `GeneratedDate`: コメント生成日時 (Date オブジェクトまたは null)。
+          - `comment`: AIコメントオブジェクト (または null)。
+            - `weather`: 天気に関するコメント (文字列または null)。
+            - `condition`: 体調に関するコメント (文字列または null)。
+            - `GeneratedDate`: コメント生成日時 (Date オブジェクトまたは null)。
 
 **エラー処理:**
 
