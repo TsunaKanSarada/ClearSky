@@ -8,7 +8,9 @@ import {
   GeoPoint, // 座標データを扱うためのクラス
   Timestamp, // Firestoreの日付データを扱うためのクラス
 } from "firebase/firestore";
-import { db } from "../firebase"; // Firestoreのインポート
+import { db } from "../../app/src/services/firebase"; // Firestoreのインポート
+
+import readline from "readline"; // npmコマンドにて削除時、ユーザー入力を受け付けるためのライブラリ
 
 // 認証ユーザーの UID を取得する処理
 import { getCurrentUserUID } from "../auth";
@@ -173,4 +175,26 @@ async function setupCollections() {
   }
 }
 
-export default { setupCollections }; // 外部で実行 & エラー処理
+// 対話的確認処理
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
+rl.question(
+  "この操作は Firestore のデータを削除します。実行してよろしいですか？ (y/n): ",
+  async (answer) => {
+    if (answer.toLowerCase() === "y" || answer.toLowerCase() === "yes") {
+      const uid = getCurrentUserUID();
+      if (!uid) {
+        console.error("ユーザーがサインインしていません。");
+      } else {
+        // 実際の削除・セットアップ処理を呼び出し
+        setupCollections().catch(console.error); // ファイル内で直接実行
+      }
+    } else {
+      console.log("操作がキャンセルされました。");
+    }
+    rl.close();
+  }
+);
