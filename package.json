@@ -1,5 +1,8 @@
 {
   "dependencies": {
     "zenn-cli": "^0.1.158"
+  },
+  "scripts": {
+    "firestore:init": "node ../scripts/npm_commands/firestoreInit.js"
   }
 }
