@@ -5,7 +5,7 @@ import React, {
   forwardRef,
   useImperativeHandle,
 } from "react";
-import { auth } from "../../service/firebase";
+import { auth } from "../../services/firebase";
 import "./animation.css";
 
 const Dashboard = forwardRef((props, ref) => {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Sun, Moon, User, Cloud } from "lucide-react";
-import { signOutUser } from "../service/auth";
+import { signOutUser } from "../services/auth";
 import CharacterDropdown from "../components/CharacterDropdown";
 
 const Header = () => {

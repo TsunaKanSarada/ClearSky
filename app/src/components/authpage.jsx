@@ -4,7 +4,7 @@ import {
   signInWithEmail,
   signInWithGoogle,
   signOutUser,
-} from "../service/auth";
+} from "../services/auth";
 import "../index.css";
 
 const AuthPage = () => {

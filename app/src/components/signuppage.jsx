@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signUpWithEmail } from "../service/auth";
+import { signUpWithEmail } from "../services/auth";
 import "../index.css";
 
 const SignUpPage = () => {
