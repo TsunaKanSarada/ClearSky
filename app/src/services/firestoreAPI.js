@@ -189,15 +189,46 @@ export async function storeSleepData(sleepData) {
 }
 
 /**
- * 位置情報と天気データを Firestore に格納します。
+ * 位置情報を Firestore に格納します。
  * usersコレクションの ユーザーID をドキュメントIDとするドキュメントの currentRecords フィールドを更新し、
  * dailyRecords サブコレクションに新しいドキュメントを追加します。
  *
- * @function storeLocation_WeatherData
+ * @function storeLocation
  * @async
  * @param {Object} location - 位置情報。
  * @param {number} location.latitude - 緯度。
  * @param {number} location.longitude - 経度。
+ * @throws {Error} ユーザーIDが取得できない場合、またはデータの格納に失敗した場合にエラーをスローします。
+ */
+export async function storeLocation(location) {
+  try {
+    const uid = getCurrentUserUID();
+    if (!uid) throw new Error("ユーザーIDが取得できません");
+    const userDocRef = doc(db, collectionName, uid);
+
+    await updateDoc(userDocRef, {
+      "currentRecords.weather.location": new GeoPoint(location.latitude, location.longitude),
+    });
+
+    const dailyRecordsRef = collection(userDocRef, subCollectionNames.users[1]);
+    await addDoc(dailyRecordsRef, {
+      weather: {
+        location: new GeoPoint(location.latitude, location.longitude),
+      },
+    });
+  } catch (error) {
+    console.error("位置情報の格納に失敗しました:", error);
+    throw new Error("位置情報の格納に失敗しました");
+  }
+}
+
+/**
+ * 天気データを Firestore に格納します。
+ * usersコレクションの ユーザーID をドキュメントIDとするドキュメントの currentRecords フィールドを更新し、
+ * dailyRecords サブコレクションに新しいドキュメントを追加します。
+ *
+ * @function storeWeatherData
+ * @async
  * @param {Object} weatherData - 天気情報。
  * @param {Date} weatherData.forecastDate - 予報日。
  * @param {number} weatherData.weatherCode - 天気コード。
@@ -211,50 +242,42 @@ export async function storeSleepData(sleepData) {
  * @param {number} [weatherData.uv] - UVインデックス (オプション)。
  * @throws {Error} ユーザーIDが取得できない場合、またはデータの格納に失敗した場合にエラーをスローします。
  */
-export async function storeLocation_WeatherData(location, weatherData) {
-    try {
-      const uid = getCurrentUserUID();
-      if (!uid) throw new Error("ユーザーIDが取得できません");
-      const userDocRef = doc(db, collectionName, uid);
-  
-      await updateDoc(userDocRef, {
-        "currentRecords.weather": {
-          location: new GeoPoint(location.latitude, location.longitude),
-          forecastDate: Timestamp.fromDate(weatherData.forecastDate),
-          weatherCode: weatherData.weatherCode,
-          temperatureMax: weatherData.temperatureMax,
-          temperatureMin: weatherData.temperatureMin,
-          apparentTemperatureMax: weatherData.apparentTemperatureMax,
-          apparentTemperatureMin: weatherData.apparentTemperatureMin,
-          humidity: weatherData.humidity,
-          pressure: weatherData.pressure,
-          windSpeed: weatherData.windSpeed,
-          ...(weatherData.uv !== undefined && { uv: weatherData.uv }),
-        },
-      });
-  
-      const dailyRecordsRef = collection(userDocRef, subCollectionNames.users[1]);
-      await addDoc(dailyRecordsRef, {
-        weather: {
-          location: new GeoPoint(location.latitude, location.longitude),
-          forecastDate: Timestamp.fromDate(weatherData.forecastDate), // 正しい
-          weatherCode: weatherData.weatherCode,
-          temperatureMax: weatherData.temperatureMax,
-          temperatureMin: weatherData.temperatureMin,
-          apparentTemperatureMax: weatherData.apparentTemperatureMax,
-          apparentTemperatureMin: weatherData.apparentTemperatureMin,
-          humidity: weatherData.humidity,
-          pressure: weatherData.pressure,
-          windSpeed: weatherData.windSpeed,
-          ...(weatherData.uv !== undefined && { uv: weatherData.uv }),
-        },
-        createdDate: Timestamp.fromDate(weatherData.forecastDate), // ここを修正: weatherData.forecastDate を使う
-      });
-    } catch (error) {
-      console.error("天気・位置情報の格納に失敗しました:", error);
-      throw new Error("天気・位置情報の格納に失敗しました");
-    }
+export async function storeWeatherData(weatherData) {
+  try {
+    const uid = getCurrentUserUID();
+    if (!uid) throw new Error("ユーザーIDが取得できません");
+    const userDocRef = doc(db, collectionName, uid);
+
+    const weatherDataToStore = {
+      forecastDate: Timestamp.fromDate(weatherData.forecastDate),
+      weatherCode: weatherData.weatherCode,
+      temperatureMax: weatherData.temperatureMax,
+      temperatureMin: weatherData.temperatureMin,
+      apparentTemperatureMax: weatherData.apparentTemperatureMax,
+      apparentTemperatureMin: weatherData.apparentTemperatureMin,
+      humidity: weatherData.humidity,
+      pressure: weatherData.pressure,
+      windSpeed: weatherData.windSpeed,
+      ...(weatherData.uv !== undefined && { uv: weatherData.uv }),
+    };
+
+    await updateDoc(userDocRef, {
+      "currentRecords.weather": {
+        ...weatherDataToStore,
+        location: userDocRef.currentRecords?.weather?.location || null,
+      },
+    });
+
+    const dailyRecordsRef = collection(userDocRef, subCollectionNames.users[1]);
+    await addDoc(dailyRecordsRef, {
+      weather: weatherDataToStore,
+      createdDate: Timestamp.fromDate(weatherData.forecastDate),
+    });
+  } catch (error) {
+    console.error("天気情報の格納に失敗しました:", error);
+    throw new Error("天気情報の格納に失敗しました");
   }
+}
 
 /**
  * 頭痛予測AIの出力結果を Firestore に格納します。
