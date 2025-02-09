@@ -1,28 +1,37 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 const AIImageWithComment = () => {
+  const fullText = "AIのコメント"; // 表示させたい全文字列
+  const [displayedText, setDisplayedText] = useState(""); // 現在表示中のテキスト
+
+  useEffect(() => {
+    let index = 0;
+    const interval = setInterval(() => {
+      // index 番目までの文字列を表示する
+      setDisplayedText(fullText.slice(0, index + 1));
+      index++;
+      if (index >= fullText.length) {
+        clearInterval(interval);
+      }
+    }, 50); // 100ミリ秒ごとに文字を追加
+    return () => clearInterval(interval); // クリーンアップ
+  }, [fullText]);
+
   return (
-    <div className="flex flex-col items-center h-[28vh]">
+    <div className="flex flex-col items-center w-full h-[27vh] bg-gradient-to-r from-pink-50 to-purple-50">
       {/* 画像を丸い円形コンテナで囲む */}
-      <div className="w-28 h-28 rounded-full shadow flex items-center justify-center overflow-hidden bg-emerald-500">
+      <div className="w-28 h-28 rounded-full shadow-lg flex items-center justify-center overflow-hidden bg-pink-200 border-4 border-white mt-4">
         <img
           src="images/1.png"  // 画像のパスを指定してください
           alt="AI"
-          className="w-24 h-24 object-cover rounded-full"
+          className="w-full h-full object-cover rounded-full"
         />
       </div>
 
-      {/* 新デザインの吹き出し */}
-      <div className="relative mt-2">
-        {/* 吹き出しのしっぽ（上側に出るように配置） */}
-        <div className="absolute left-1/2 transform -translate-x-1/2 -translate-y-full">
-          <svg width="16" height="8" viewBox="0 0 16 8" xmlns="http://www.w3.org/2000/svg">
-            <path d="M8 0L0 8H16L8 0Z" className="fill-sky-200" />
-          </svg>
-        </div>
-        {/* 固定サイズの吹き出し本体（横を狭く、縦を長く固定） */}
-        <div className="bg-sky-200 rounded-xl shadow-lg text-sm font-bold w-60 h-24 flex items-center justify-center text-center mb-2">
-          AIのコメント
+      {/* コメント（flex-growで残りの高さを埋め、下端まで広がるようにする） */}
+      <div className="flex-grow w-full flex justify-center">
+        <div className="bg-white rounded-2xl shadow-md text-sm font-medium text-pink-600 w-[80%] h-full flex items-center justify-center border border-pink-200">
+          {displayedText}
         </div>
       </div>
     </div>

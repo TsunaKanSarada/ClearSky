@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 // 吹き出しコンポーネント（指定したメッセージを順次表示）
 const SpeechBubble = ({ messages, interval = 3000, className = '' }) => {
@@ -19,42 +18,52 @@ const SpeechBubble = ({ messages, interval = 3000, className = '' }) => {
   );
 };
 
-// 複数画像の状態を一括管理するコンポーネント
+// キャラクターのアニメーション画像
 const AnimatedImages = ({
   images, 
-  speed = 25,         // 1秒あたりの移動ピクセル数
-  imageSize = 70,      // px 単位（Tailwind の w-24,h-24 と同等）
-  happyDuration = 1000,    // 衝突時の喜び状態の持続時間（ms）
-  collisionPauseDuration = 2500,  // happy 状態終了後、衝突判定を一時停止する期間（ms）
-  commentMessages = ['こんにちは！', '元気ですか？', 'さようなら！'] // 吹き出しのメッセージ
+  speed = 25,
+  imageSize = 70,
+  happyDuration = 1000,
+  collisionPauseDuration = 2500,
+  commentMessages = ['こんにちは！', '元気ですか？', 'さようなら！'],
+  containerRef, // コンテナの ref を受け取る
+  bottomOffset = 0 // 下部の余白（例：フッター分の高さ）
 }) => {
-  // 画面サイズ（リサイズに対応）
-  const [dimensions, setDimensions] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight
-  });
+  // コンテナのサイズを取得する関数（containerRef が取得できればそのサイズ、なければ window サイズ）
+  const getContainerDimensions = () => {
+    if (containerRef && containerRef.current) {
+      return {
+        width: containerRef.current.clientWidth,
+        height: containerRef.current.clientHeight
+      };
+    }
+    return { width: window.innerWidth, height: window.innerHeight };
+  };
+
+  const [dimensions, setDimensions] = useState(getContainerDimensions);
+
   useEffect(() => {
     const handleResize = () => {
-      setDimensions({ width: window.innerWidth, height: window.innerHeight });
+      setDimensions(getContainerDimensions());
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [containerRef]);
 
-  // 各画像の初期状態。nextTurn は3～10秒後にランダムな角度変更を行うタイミング
+  // 初期位置の計算では、コンテナのサイズと下部の余白を利用
   const [imageStates, setImageStates] = useState(() =>
     images.map(src => ({
       src,
-      x: Math.random() * (window.innerWidth - imageSize),
-      y: Math.random() * (window.innerHeight - imageSize),
-      angle: Math.random() * 2 * Math.PI, // 0～2π のランダム角度
+      x: Math.random() * (getContainerDimensions().width - imageSize),
+      y: Math.random() * (getContainerDimensions().height - imageSize - bottomOffset),
+      angle: Math.random() * 2 * Math.PI,
       speed: speed,
-      isHappy: false,         // 衝突時に一時的に true にする
-      happyStart: null,       // happy 状態開始時刻（ms）
-      collisionPausedUntil: null,  // 衝突判定を一時停止する期限（ms）
-      escapeAngle: null,      // 衝突後に歩いて離れる方向（ラジアン）
-      collisionAnimation: null, // 衝突時のアニメーションクラス（後でランダム設定）
-      nextTurn: performance.now() + (Math.random() * 7000 + 3000) // 次のランダムターンのタイミング（3～10秒後）
+      isHappy: false,
+      happyStart: null,
+      collisionPausedUntil: null,
+      escapeAngle: null,
+      collisionAnimation: null,
+      nextTurn: performance.now() + (Math.random() * 7000 + 3000)
     }))
   );
 
@@ -65,17 +74,14 @@ const AnimatedImages = ({
       const dt = now - lastTime;
       lastTime = now;
       setImageStates(prevStates => {
-        // 各画像の状態更新
         const newStates = prevStates.map(img => {
           if (img.isHappy) {
-            // happy 状態中は移動停止。happyDuration 経過後に通常状態へ戻す
             if (now - img.happyStart >= happyDuration) {
               return {
                 ...img,
                 isHappy: false,
                 happyStart: null,
-                collisionAnimation: null, // 衝突アニメーションの解除
-                // escapeAngle があればその方向に、なければランダムな方向に切替え
+                collisionAnimation: null,
                 angle: img.escapeAngle !== null ? img.escapeAngle : Math.random() * 2 * Math.PI,
                 escapeAngle: null,
                 collisionPausedUntil: now + collisionPauseDuration
@@ -83,25 +89,21 @@ const AnimatedImages = ({
             }
             return img;
           } else {
-            // collisionPausedUntil が設定され、まだその期間内ならそのまま
             let newCollisionPausedUntil = img.collisionPausedUntil;
             if (img.collisionPausedUntil && now >= img.collisionPausedUntil) {
               newCollisionPausedUntil = null;
             }
-            // 通常移動中：一定間隔でランダムに角度を変更（3～10秒ごと）
             let newAngle = img.angle;
             let newNextTurn = img.nextTurn;
             if (now >= img.nextTurn) {
-              // 0～90°のランダムな角度変化（左右どちらかの方向）
               let delta = Math.random() * (Math.PI / 2);
               if (Math.random() < 0.5) delta = -delta;
               newAngle = img.angle + delta;
-              newNextTurn = now + (Math.random() * 7000 + 3000); // 次回は3～10秒後
+              newNextTurn = now + (Math.random() * 7000 + 3000);
             }
-            // 位置更新（新しい角度で移動）
             let newX = img.x + img.speed * Math.cos(newAngle) * (dt / 1000);
             let newY = img.y + img.speed * Math.sin(newAngle) * (dt / 1000);
-            // 画面境界で反射（バウンド）
+            // X 座標の境界判定
             if (newX < 0) {
               newX = 0;
               newAngle = Math.PI - newAngle;
@@ -109,11 +111,12 @@ const AnimatedImages = ({
               newX = dimensions.width - imageSize;
               newAngle = Math.PI - newAngle;
             }
+            // Y 座標の境界判定（下部は bottomOffset 分余裕を持つ）
             if (newY < 0) {
               newY = 0;
               newAngle = -newAngle;
-            } else if (newY > dimensions.height - imageSize) {
-              newY = dimensions.height - imageSize;
+            } else if (newY > dimensions.height - imageSize - bottomOffset) {
+              newY = dimensions.height - imageSize - bottomOffset;
               newAngle = -newAngle;
             }
             return { 
@@ -127,8 +130,7 @@ const AnimatedImages = ({
           }
         });
 
-        // 衝突判定（collisionPaused 中でない画像同士）
-        // 衝突時は、3種類のアニメーションのうちランダムなものを割り当てる
+        // 衝突判定
         const randomCollisionAnimation = () => {
           const animations = ['animate-collision1', 'animate-collision2', 'animate-collision3'];
           return animations[Math.floor(Math.random() * animations.length)];
@@ -151,9 +153,8 @@ const AnimatedImages = ({
               const dy = center1Y - center2Y;
               const distance = Math.sqrt(dx * dx + dy * dy);
               if (distance < imageSize) {
-                // 衝突発生 → 各画像の逃げる方向を計算し、ランダムな衝突アニメーションを設定
-                const escapeAngle1 = Math.atan2(dy, dx);   // img1は img2 から離れる方向
-                const escapeAngle2 = Math.atan2(-dy, -dx);   // img2は img1 から離れる方向
+                const escapeAngle1 = Math.atan2(dy, dx);
+                const escapeAngle2 = Math.atan2(-dy, -dx);
                 newStates[i] = { 
                   ...img1, 
                   isHappy: true, 
@@ -178,18 +179,16 @@ const AnimatedImages = ({
     };
     const animationFrameId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animationFrameId);
-  }, [dimensions, imageSize, speed, happyDuration, collisionPauseDuration]);
+  }, [dimensions, imageSize, speed, happyDuration, collisionPauseDuration, bottomOffset]);
 
   return (
     <>
       {imageStates.map((img, index) => (
-        // 各キャラクターを包むコンテナ（位置はキャラクターの左上座標）
         <div
           key={index}
           className="absolute"
           style={{ left: img.x, top: img.y, width: imageSize, height: imageSize }}
         >
-          {/* 吹き出しをキャラクターの上に配置 */}
           <SpeechBubble 
             messages={commentMessages}
             interval={3000}
@@ -214,8 +213,34 @@ const AnimatedImages = ({
   );
 };
 
+// 家具オブジェクトを表示するコンポーネント
+const Furniture = ({ items, imageSize = 100 }) => {
+  return (
+    <>
+      {items.map((item, index) => (
+        <img
+          key={index}
+          src={item.src}
+          alt={item.alt}
+          style={{
+            position: 'absolute',
+            left: item.x,
+            top: item.y,
+            width: imageSize,
+            height: 'auto',
+            zIndex: 5
+          }}
+        />
+      ))}
+    </>
+  );
+};
+
 // メインコンポーネント
 const Chat = () => {
+  // コンテナのサイズを取得するための ref を作成
+  const containerRef = useRef(null);
+  
   const commentMessages = ['こんにちは！', '元気ですか？', 'さようなら！'];
   const images = [
     'images/1.png',
@@ -223,17 +248,49 @@ const Chat = () => {
     'https://thumb.ac-illust.com/09/090cd61d1f5d3c8877455f89d1c74713_t.jpeg'
   ];
 
+  // 家具オブジェクトを指定された位置に配置
+  const furnitureItems = [
+    { src: 'images/sofa.png', alt: 'ソファ', x: '15%', y: '15%' },
+    { src: 'images/table.png', alt: 'テーブル', x: '40%', y: '40%' },
+    { src: 'images/chair.png', alt: 'チェア', x: '50%', y: '60%' }
+  ];
+
   return (
-    <div className="relative w-full h-screen bg-[url('https://aomaterial.com/wp-content/uploads/2024/06/cfbb2be920e3fce05ad2f650e22d713f.png')] overflow-hidden ">
+    // 薄いピンク色をベースに、白い水玉パターンの背景
+    // コンテナの div に ref を設定
+    <div
+      ref={containerRef}
+      className="relative w-full h-screen overflow-hidden"
+      style={{
+        backgroundColor: "#ffe4e1",
+        backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.8) 15%, transparent 16%), radial-gradient(circle, rgba(255,255,255,0.8) 15%, transparent 16%)",
+        backgroundPosition: "0 0, 20px 20px",
+        backgroundSize: "40px 40px"
+      }}
+    >
+      {/* 家具オブジェクトレイヤー（静的なオブジェクト） */}
+      <Furniture items={furnitureItems} imageSize={120} />
+      
+      {/* キャラクターなどのアニメーション画像レイヤー */}
+      <div className="relative z-10">
+        <AnimatedImages 
+          images={images} 
+          speed={25} 
+          imageSize={70} 
+          happyDuration={1000} 
+          collisionPauseDuration={2500}
+          commentMessages={commentMessages}
+          containerRef={containerRef}
+          bottomOffset={120}
+        />
+      </div>
+      
       <style>
         {`
           @keyframes poyon {
             0%   { transform: scale(1.0) translate(0%, 0%); }
             15%  { transform: scale(0.9) translate(0%, 5%); }
-            30%  { 
-                  /* 複数の transform 指定がある場合は、最終的な指定が有効になります */
-                  transform: scale(1.3) translate(0%, 10%) translateY(-20px); 
-                }
+            30%  { transform: scale(1.3) translate(0%, 10%) translateY(-20px); }
             50%  { transform: scale(0.85) translate(0%, -10%); }
             70%  { transform: scale(1.05) translate(0%, 5%); }
             100% { transform: scale(1.0) translate(0%, 0%); }
@@ -241,7 +298,6 @@ const Chat = () => {
           .animate-poyon {
             animation: poyon 1.5s ease infinite;
           }
-          /* 衝突時のアニメーションバリエーション１：シェイク＋回転 */
           @keyframes collision1 {
             0%   { transform: scale(1.2) rotate(0deg); }
             25%  { transform: scale(1.3) rotate(5deg); }
@@ -252,7 +308,6 @@ const Chat = () => {
           .animate-collision1 {
             animation: collision1 0.8s ease-in-out;
           }
-          /* 衝突時のアニメーションバリエーション２：バウンス */
           @keyframes collision2 {
             0%   { transform: scale(1); }
             50%  { transform: scale(1.5); }
@@ -261,7 +316,6 @@ const Chat = () => {
           .animate-collision2 {
             animation: collision2 0.8s ease-in-out;
           }
-          /* 衝突時のアニメーションバリエーション３：左右ウィグル */
           @keyframes collision3 {
             0%   { transform: translateX(0); }
             25%  { transform: translateX(-10px); }
@@ -274,14 +328,6 @@ const Chat = () => {
           }
         `}
       </style>
-      <AnimatedImages 
-        images={images} 
-        speed={25} 
-        imageSize={70} 
-        happyDuration={1000} 
-        collisionPauseDuration={2500}
-        commentMessages={commentMessages}
-      />
     </div>
   );
 };

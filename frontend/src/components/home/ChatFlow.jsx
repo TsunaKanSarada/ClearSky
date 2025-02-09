@@ -9,19 +9,21 @@ const ChatFlow = ({ data }) => {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentText, setCurrentText] = useState("");
+  const [displayedMessage, setDisplayedMessage] = useState("");
   const [showComment, setShowComment] = useState(false);
 
   // animation.jsx のメソッドを呼び出すための Ref
   const dashboardRef = useRef(null);
 
+  // メッセージの切り替えと各種アニメーションの実行
   useEffect(() => {
     // まだ表示していないメッセージがあれば処理する
     if (currentIndex < messages.length) {
       const [text, code] = messages[currentIndex];
-      setCurrentText(text);
+      setCurrentText(text); // アニメーション対象のテキストを更新
 
       // アニメーションの時間（ここを一律7秒に設定）
-      let duration = 7000;
+      const duration = 7000;
 
       if (dashboardRef.current) {
         switch (code) {
@@ -78,9 +80,25 @@ const ChatFlow = ({ data }) => {
     }
   }, [currentIndex, messages]);
 
+  // currentText を50ミリ秒ごとに1文字ずつ表示する処理
+  useEffect(() => {
+    // 新しいテキストが来たら表示をリセット
+    setDisplayedMessage("");
+    if (!currentText) return;
+    let index = 0;
+    const interval = setInterval(() => {
+      setDisplayedMessage((prev) => prev + currentText.charAt(index));
+      index++;
+      if (index >= currentText.length) {
+        clearInterval(interval);
+      }
+    }, 50); // 50ミリ秒ごとに1文字追加
+    return () => clearInterval(interval);
+  }, [currentText]);
+
   return (
     <div className="flex flex-col items-center">
-      {showComment && <Comment>{currentText}</Comment>}
+      {showComment && <Comment>{displayedMessage}</Comment>}
       <Dashboard ref={dashboardRef} />
     </div>
   );

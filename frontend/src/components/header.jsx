@@ -86,7 +86,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-12">
           {/* ヘッダー左側 */}
           <div className="flex items-center">
-            <a href="/" className="flex items-center">
+            <a href="/home" className="flex items-center">
               <Cloud
                 className={`h-8 w-8 mr-2 animate-pulse-slow ${
                   isDarkMode ? "text-yellow-200" : "text-white"

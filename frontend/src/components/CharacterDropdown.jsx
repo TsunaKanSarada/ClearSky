@@ -56,14 +56,13 @@ const CharacterDropdown = ({ selected, onSelect, characters = [1, 2, 3, 4, 5, 6,
       </button>
 
       {isOpen && (
-        <div className="absolute mt-2 left-0 right-0 bg-gradient-to-br from-pink-50 to-purple-50 rounded-2xl shadow-lg p-3 ring-1 ring-pink-100 animate-fadeIn z-10 backdrop-blur-sm">
-          {/* ここでplace-items-centerを追加 */}
-          <div className="grid grid-cols-4 gap-2 place-items-center">
+        <div className="absolute mt-2 left-0 right-0 bg-gradient-to-br from-pink-50 to-purple-50 rounded-2xl shadow-lg ring-1 ring-pink-100 animate-fadeIn z-10 backdrop-blur-sm">
+          <div className="grid grid-cols-4 gap-2">
             {characters.map((num) => (
               <button
                 key={num}
                 onClick={() => handleSelect(num)}
-                className="focus:outline-none transform hover:scale-110 transition-all p-1 rounded-full bg-transparent"
+                className="focus:outline-none transform hover:scale-110 transition-all h-12 w-12 rounded-full bg-transparent"
               >
                 <img
                   src={`/images/${num}.png`}

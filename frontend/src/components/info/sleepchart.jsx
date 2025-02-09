@@ -1,4 +1,6 @@
 import React from "react";
+import { motion } from "framer-motion"; // アニメーション用（framer-motionを利用）
+import Loading from "../loading";
 
 const SleepChart = ({ pressureData }) => {
   // ダミーデータ：曜日ごとの睡眠時間（単位: 時間）
@@ -12,10 +14,13 @@ const SleepChart = ({ pressureData }) => {
     { day: "日", hours: 8 },
   ];
 
-  // チャートの基本サイズと余白の設定（内部計算用）
-  const baseWidth = 400; // viewBox の幅
-  const baseHeight = 200; // viewBox の高さ
+  // チャートの基本サイズと余白の設定
+  const baseWidth = 400;
+  const baseHeight = 200;
   const padding = 40;
+  // Y軸を padding からさらに左に 10px ずらす（例: 40 - 10 = 30）
+  const yAxisX = padding - 10;
+
   const n = sleepData.length;
   const xInterval = (baseWidth - 2 * padding) / (n - 1);
 
@@ -23,28 +28,23 @@ const SleepChart = ({ pressureData }) => {
   const maxSleepHours = Math.max(...sleepData.map((data) => data.hours));
   const sleepPoints = sleepData.map((data, index) => {
     const x = padding + index * xInterval;
-    // y 座標は上が 0 となるため、反転して計算
-    const y =
-      baseHeight - padding - (data.hours / maxSleepHours) * (baseHeight - 2 * padding);
+    const y = baseHeight - padding - (data.hours / maxSleepHours) * (baseHeight - 2 * padding);
     return { x, y, day: data.day, hours: data.hours };
   });
 
-  // 気圧データが渡されており、sleepData と日数が合致する場合に棒グラフを描画
+  // 気圧データを棒グラフとして描画するための計算
   let pressureBars = null;
   if (pressureData && pressureData.length === n) {
     const minPressure = Math.min(...pressureData);
     const maxPressure = Math.max(...pressureData);
     const barWidth = 20;
-    // 気圧を棒グラフの高さに変換するスケール関数
     const scalePressure = (pressure) =>
       ((pressure - minPressure) / (maxPressure - minPressure)) * (baseHeight - 2 * padding);
-
     pressureBars = pressureData.map((pressure, index) => {
       const barHeight = scalePressure(pressure);
-      // 棒の x 座標は睡眠データのデータポイントに合わせ、中央寄せ
       const x = padding + index * xInterval - barWidth / 2;
       const y = baseHeight - padding - barHeight;
-      return { x, y, barHeight, pressure };
+      return { x, y, barHeight, pressure, index };
     });
   }
 
@@ -52,20 +52,19 @@ const SleepChart = ({ pressureData }) => {
   const sleepPolyline = sleepPoints.map((p) => `${p.x},${p.y}`).join(" ");
 
   return (
-    // 外側のコンテナに、デバイスの高さの30%（30vh）と幅の100%（100vw）を指定
-    <div className="p-2" style={{ height: "30vh", width: "100vw" }}>
-      <svg
-        width="100%"
-        height="100%"
-        viewBox={`0 0 ${baseWidth} ${baseHeight}`}
-        className="border"
-      >
-        {/* 気圧棒グラフ用のグラデーション定義（下が赤、上が明るい緑） */}
+    // 外側コンテナ
+    <div className="p-4 bg-gradient-to-br from-pink-50 to-yellow-50 rounded-xl shadow-lg">
+      <svg width="100%" height="100%" viewBox={`0 0 ${baseWidth} ${baseHeight}`} className="rounded-xl">
         <defs>
+          {/* グラデーション定義：上部は淡いピンク、下部は柔らかいオレンジ */}
           <linearGradient id="pressureGradient" x1="0" y1="1" x2="0" y2="0">
-            <stop offset="0%" stopColor="red" />
-            <stop offset="100%" stopColor="limegreen" />
+            <stop offset="0%" stopColor="#ff9a9e" />
+            <stop offset="100%" stopColor="#fad0c4" />
           </linearGradient>
+          {/* ドロップシャドウ用のフィルター */}
+          <filter id="shadow">
+            <feDropShadow dx="2" dy="2" stdDeviation="2" floodColor="#fca5a5" />
+          </filter>
         </defs>
 
         {/* グラフのタイトル */}
@@ -73,111 +72,62 @@ const SleepChart = ({ pressureData }) => {
           x={baseWidth / 2}
           y="20"
           textAnchor="middle"
-          className="text-xl font-bold"
+          className="text-lg font-bold fill-pink-600"
         >
-          1週間の睡眠時間と片頭痛リスク
+          1週間の睡眠時間と気圧
         </text>
 
         {/* 軸の描画 */}
-        {/* y 軸 */}
-        <line
-          x1={padding}
-          y1={padding}
-          x2={padding}
-          y2={baseHeight - padding}
-          stroke="black"
-          strokeWidth="1"
-        />
-        {/* x 軸 */}
-        <line
-          x1={padding}
-          y1={baseHeight - padding}
-          x2={baseWidth - padding}
-          y2={baseHeight - padding}
-          stroke="black"
-          strokeWidth="1"
-        />
+        {/* Y軸の位置を yAxisX に変更 */}
+        <line x1={yAxisX} y1={padding} x2={yAxisX} y2={baseHeight - padding} stroke="#fbcfe8" strokeWidth="1" />
+        <line x1={padding} y1={baseHeight - padding} x2={baseWidth - padding} y2={baseHeight - padding} stroke="#fbcfe8" strokeWidth="1" />
 
-        {/* 睡眠時間の y 軸ラベル */}
-        <text
-          x={padding - 10}
-          y={baseHeight - padding + 5}
-          textAnchor="end"
-          className="text-xs"
-        >
-          0h
-        </text>
-        <text
-          x={padding - 10}
-          y={padding + 5}
-          textAnchor="end"
-          className="text-xs"
-        >
-          {maxSleepHours}h
-        </text>
-        <text
-          x={padding - 10}
-          y={(padding + (baseHeight - padding)) / 2}
-          textAnchor="end"
-          className="text-xs"
-        >
-          {Math.round(maxSleepHours / 2)}h
-        </text>
-
-        {/* 気圧の棒グラフ（睡眠データの背景として描画） */}
+        {/* 気圧の棒グラフ（背景に淡いグラデーションとシャドウ、アニメーション追加） */}
         {pressureBars &&
-          pressureBars.map((bar, index) => (
-            <g key={`pressure-${index}`}>
-              <rect
+          pressureBars.map((bar) => (
+            <g key={`pressure-${bar.index}`}>
+              <motion.rect
                 x={bar.x}
-                y={bar.y}
                 width={20}
-                height={bar.barHeight}
                 fill="url(#pressureGradient)"
-                stroke="black"
-                strokeWidth="0.3"
-                opacity="0.6"
+                filter="url(#shadow)"
+                opacity="0.7"
+                initial={{ height: 0, y: baseHeight - padding }}
+                animate={{ height: bar.barHeight, y: bar.y }}
+                transition={{ duration: 1, ease: "easeInOut", delay: bar.index * 0.1 }}
               />
-              {/* 棒の上部に気圧値のラベル */}
-              <text
-                x={bar.x + 10}
-                y={bar.y - 5}
-                textAnchor="middle"
-                className="text-[9px]"
-              >
+              <text x={bar.x + 10} y={bar.y - 5} textAnchor="middle" className="text-[9px] fill-gray-600">
                 {bar.pressure}hPa
               </text>
             </g>
           ))}
 
-        {/* 睡眠時間の折れ線グラフ */}
-        <polyline
+        {/* 睡眠時間の折れ線グラフ（framer-motionで滑らかな描画アニメーション） */}
+        <motion.polyline
           fill="none"
-          stroke="blue"
-          strokeWidth="2"
+          stroke="#4ade80"
+          strokeWidth="3"
           points={sleepPolyline}
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: 1 }}
+          transition={{ duration: 1.5, ease: "easeInOut" }}
         />
 
         {/* 各曜日のデータポイントとラベル */}
         {sleepPoints.map((p, index) => (
           <g key={`sleep-${index}`}>
-            <circle cx={p.x} cy={p.y} r="4" fill="blue" />
-            {/* x 軸下の曜日ラベル */}
-            <text
-              x={p.x}
-              y={baseHeight - padding + 15}
-              textAnchor="middle"
-              className="text-xs"
-            >
+            <motion.circle
+              cx={p.x}
+              cy={p.y}
+              r="4"
+              fill="#4ade80"
+              whileHover={{ scale: 1.3, fill: "#16a34a" }}
+              transition={{ type: "spring", stiffness: 300 }}
+            />
+            <text x={p.x} y={baseHeight - padding + 15} textAnchor="middle" className="text-xs fill-gray-500">
               {p.day}
             </text>
-            {/* 睡眠時間の数値ラベル */}
-            <text
-              x={p.x}
-              y={baseHeight - padding + 30}
-              textAnchor="middle"
-              className="text-xs text-gray-600"
-            >
+            <text x={p.x} y={baseHeight - padding + 30} textAnchor="middle" className="text-xs fill-gray-500">
               {p.hours}h
             </text>
           </g>

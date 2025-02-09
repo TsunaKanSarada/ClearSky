@@ -119,7 +119,7 @@ const Info = () => {
   const pressureData = dailyData.map((day) => day.pressure);
 
   return (
-    // 外側コンテナは横幅だけデバイスサイズに合わせています
+    // 外側コンテナは横幅だけデバイスサイズに合わせています（位置やサイズは変更せず）
     <div className="mx-auto" style={{ width: `${deviceWidth}px` }}>
       {loading && <Loading />}
       {error && (
@@ -129,20 +129,20 @@ const Info = () => {
 
       {!loading && !error && dailyData.length > 0 && (
         <>
-          {/* 天気情報のコンテナ：横幅は deviceWidth の100%、高さは deviceHeight の30% */}
+          {/* 天気情報のコンテナ（サイズは変更せずに、見た目をかわいらしく調整） */}
           <div
             style={{
               width: `${deviceWidth}px`,
-              height: `$200px`,
+              height: `200px`,
             }}
           >
-            <div className="flex w-full h-full mb-4">
+            <div className="flex w-full h-full">
               {dailyData.map((day) => (
                 <div
                   key={day.date}
-                  className="flex-1 border border-gray-300 rounded px-1 py-1 flex flex-col items-center"
+                  className="flex-1 border border-pink-200 rounded-lg py-2 flex flex-col items-center bg-white/80 shadow-sm transition-transform duration-300 hover:scale-105 m-1"
                 >
-                  <div className="w-full text-center text-xs border-b border-gray-300 pb-1">
+                  <div className="w-full text-center text-xs border-b border-pink-200 pb-1">
                     {day.formattedDate}
                   </div>
                   <div className="flex flex-col items-center justify-center pt-1">
