@@ -19,6 +19,7 @@
 　       ├── userId (string)
 　       ├── name (string)
 　       ├── character (number)
+　       ├── headacheRecord (number) # 急遽追加
 　       ├── currentRecords (map)
 　       │   ├── sleepHours (number)
 　       │   ├── weather (map)
