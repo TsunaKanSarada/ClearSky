@@ -7,7 +7,7 @@ import Header from "../components/header";
 import Dashboard from "../components/dashboard";
 import Footer from "../components/footer";
 import Authpage from "../components/authpage";
-import DBGetTest from "../components/dbtestGet";
+// import DBGetTest from "../components/dbtestGet"; // データベーステストページ
 
 const ProtectedRoute = ({ children }) => {
     const { currentUser } = useAuth(); // 認証状態を取得
@@ -28,7 +28,7 @@ function RouteController() {
                 {/* パブリックルート：ログインページ */}
                 <Route path="/" element={<Authpage />} />
                 {/* パブリックルート：データベーステストページ */}
-                <Route path="/dbtest" element={<DBGetTest />} />
+                {/* <Route path="/dbtest" element={<DBGetTest />} /> */}
 
                 {/* プロテクトルート(要認証)：ホームページ */}
                 <Route

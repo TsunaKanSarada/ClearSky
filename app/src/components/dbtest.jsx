@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import * as dbAPI from "../services/firestore/databaseAPI"; // ここは変更なし
+import * as dbAPI from "../services/firestoreAPI"; // ここは変更なし
 
 function DBtest() {
   const [testResult, setTestResult] = useState('');

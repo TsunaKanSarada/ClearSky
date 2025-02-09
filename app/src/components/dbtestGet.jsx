@@ -3,7 +3,7 @@
  */
 import { useState, useEffect } from 'react';
 import * as dbAPI from "../services/firestore/databaseAPI"; // データ取得/書き込み関数
-import * as dbInit from "../services/firestore/databaseInit"; // 初期化関数 (databaseInit.js) パスは適宜修正
+import * as dbInit from "../../../scripts/npm_commands/firestoreInit"; // 初期化関数 (firestoreInit.js) パスは適宜修正
 import { getCurrentUserUID } from "../services/auth"; // 認証関連 (auth.js) パスは適宜修正
 import { Timestamp } from 'firebase/firestore';
 

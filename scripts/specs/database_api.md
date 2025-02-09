@@ -1,7 +1,7 @@
 # データベースAPI仕様書
 
 このドキュメントでは、FirestoreデータベースAPIについて、仕様をまとめています。
-`ClearSky/app/src/services/firestore/databaseAPI.js`
+`ClearSky/app/src/services/firestoreAPI.js`
 
 ## データベースへの格納関数 
 
