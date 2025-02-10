@@ -119,8 +119,6 @@ exports.processAIPrediction = onDocumentUpdated({
 
             リスクスコアは以下の数値で表してください：
             0: リスクなし ~ 100: 非常に高いリスク
-
-            回答は数字のみを返してください：
         `;
 
         const result = await context.generateContent(prompt);
