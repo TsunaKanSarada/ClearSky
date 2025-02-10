@@ -1,0 +1,43 @@
+# taskは環境構築の内容が記述されたメモ。これにより環境が統一化される
+version: '3'
+
+tasks:
+  pre:
+    desc: "🏃‍♀️: 開発を始めるために必要な作業一式"
+    cmds:
+      - task: install
+      - "echo \"\n----------✅開発準備完了！---------\n\\`task\\`で使用可能なコマンド一覧、\\`task dev\\`で開発を開始します🫡\""
+
+  dev:
+    dir: app
+    desc: "💻: 開発"
+    cmds:
+      - "bun run dev"
+  
+  install:
+    desc: "⬇️: 必要なパッケージのインストール"
+    cmds:
+      - task: frontend:install
+      # - task: backend:install
+  
+  frontend:install:
+    dir: app
+    desc: "🎨.⬇️: フロントエンドでbun install"
+    cmds:
+      - bun install
+  
+  frontend:module:
+    dir: app
+    desc: "🏳️.⬇️: フロントエンドに必要なmodule"
+    cmds:
+      - npm install dotenv
+      - npm install firebase
+      - npm install object-dig
+      - npm install prop-types
+      - npm install react-dom
+      - npm install react-router-dom
+  
+  # backend:install:
+    # desc: "⚙️.⬇️: バックエンドで必要なパッケージのインストール"
+    # cmds:
+      # - go mod tidy

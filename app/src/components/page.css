@@ -1,0 +1,113 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #e6f7ff;
+  color: #333;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.app {
+  text-align: center;
+}
+
+.container {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+  padding: 30px 20px;
+  max-width: 400px;
+  width: 100%;
+}
+
+h1 {
+  color: #0099cc;
+  margin-bottom: 20px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.input {
+  width: 90%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.input:focus {
+  border-color: #0099cc;
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 153, 204, 0.5);
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.button {
+  width: 90%;
+  padding: 12px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.signup {
+  background-color: #66cc66;
+  color: white;
+}
+
+.signup:hover {
+  background-color: #55aa55;
+}
+
+.signin {
+  background-color: #0099cc;
+  color: white;
+}
+
+.signin:hover {
+  background-color: #0077aa;
+}
+
+.google {
+  background-color: #db4437;
+  color: white;
+}
+
+.google:hover {
+  background-color: #a83326;
+}
+
+.signout {
+  background-color: #ffcc00;
+  color: white;
+}
+
+.signout:hover {
+  background-color: #e6b800;
+}
+
+.user-info {
+  margin-top: 20px;
+  padding: 10px;
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  text-align: left;
+}

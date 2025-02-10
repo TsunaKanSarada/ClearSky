@@ -1,0 +1,4 @@
+[tools]
+go = "1.23.2"
+task = "latest"
+bun = "latest"

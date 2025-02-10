@@ -1,0 +1,17 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ユーザー個人情報へのアクセスルール
+    match /users/{userId}/profile {
+
+        // 認証済みユーザーかつ対象が自身のプロフィールの場合のみ、読み書きを許可する
+        allow read, update, delete: if request.auth != null && request.auth.uid == userId;
+        
+        // 一方で、認証済みユーザーであれば、作成のみであれば許可する
+        allow create: if request.auth != null;
+
+      }
+    }
+  }
+}
