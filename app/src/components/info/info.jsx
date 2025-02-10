@@ -8,8 +8,8 @@ import AIImageWithComment from "./AIcomment";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // Gemini API の初期化（コンポーネント外で初期化しておく）
-const genAI = new GoogleGenerativeAI("AIzaSyBhwVVT_D9HiQSnrZs1KdQIT4p8bMoHrZ0");
-console.log(import.meta.env.gemini_API_KEY)
+const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
+console.log(import.meta.env.VITE_GEMINI_API_KEY)
 
 
 // 天気コードに応じたアイコン（絵文字）を返すヘルパー関数

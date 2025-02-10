@@ -18,10 +18,22 @@ const AuthPage = () => {
   const redirectByProfile = async () => {
     try {
       await dbAPI.getProfile();
-      // getProfile が正常に実行できたら /test に遷移
-      navigate("/home");
+      
+      // 本日の睡眠データを確認
+      const today = new Date();
+      const { sleepHours, date } = await dbAPI.getSleepForDate(today);
+
+      console.log(sleepHours, date);
+      
+      if (sleepHours === null || date === null) {
+        // 睡眠データが未記録の場合は質問ページへ
+        navigate("/daily_question");
+      } else {
+        // 睡眠データが記録済みの場合はホームへ
+        navigate("/home");
+      }
     } catch (error) {
-      // エラーが発生した場合は /home に遷移
+      // プロフィールが存在しない場合は登録ページへ
       navigate("/regi");
     }
   };

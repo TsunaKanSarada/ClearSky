@@ -20,7 +20,7 @@ const SignUpPage = () => {
     try {
       const newUser = await signUpWithEmail(email, password);
       // 登録成功後、ホームページへリダイレクト（必要に応じてルートは変更してください）
-      navigate("/Home");
+      navigate("/regi");
     } catch (error) {
       alert(`サインアップに失敗しました: ${error.message}`);
     }
