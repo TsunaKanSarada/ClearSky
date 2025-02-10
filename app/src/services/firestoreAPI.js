@@ -195,45 +195,11 @@ export async function storeSleepData(sleepData) {
 }
 
 /**
- * 位置情報を Firestore に格納します。
+ * 天気データと位置情報を Firestore に格納します。
  * usersコレクションの ユーザーID をドキュメントIDとするドキュメントの currentRecords フィールドを更新し、
  * dailyRecords サブコレクションに新しいドキュメントを追加します。
  *
- * @function storeLocation
- * @async
- * @param {Object} location - 位置情報。
- * @param {number} location.latitude - 緯度。
- * @param {number} location.longitude - 経度。
- * @throws {Error} ユーザーIDが取得できない場合、またはデータの格納に失敗した場合にエラーをスローします。
- */
-export async function storeLocation(location) {
-  try {
-    const uid = getCurrentUserUID();
-    if (!uid) throw new Error("ユーザーIDが取得できません");
-    const userDocRef = doc(db, collectionName, uid);
-
-    await updateDoc(userDocRef, {
-      "currentRecords.weather.location": new GeoPoint(location.latitude, location.longitude),
-    });
-
-    const dailyRecordsRef = collection(userDocRef, subCollectionNames.users[1]);
-    await addDoc(dailyRecordsRef, {
-      weather: {
-        location: new GeoPoint(location.latitude, location.longitude),
-      },
-    });
-  } catch (error) {
-    console.error("位置情報の格納に失敗しました:", error);
-    throw new Error("位置情報の格納に失敗しました");
-  }
-}
-
-/**
- * 天気データを Firestore に格納します。
- * usersコレクションの ユーザーID をドキュメントIDとするドキュメントの currentRecords フィールドを更新し(location は除く)、
- * dailyRecords サブコレクションに新しいドキュメントを追加します。
- *
- * @function storeWeatherData
+ * @function storeWeatherAndLocationData
  * @async
  * @param {Object} weatherData - 天気情報。
  * @param {Date} weatherData.forecastDate - 予報日。
@@ -245,15 +211,17 @@ export async function storeLocation(location) {
  * @param {number} weatherData.humidity - 湿度。
  * @param {number} weatherData.pressure - 気圧。
  * @param {number} weatherData.windSpeed - 風速。
- * @param {number} [weatherData.uv] - UVインデックス (オプション)。
+ * @param {number} weatherData.uv - UVインデックス。
+ * @param {Object} location - 位置情報。
+ * @param {number} location.latitude - 緯度。
+ * @param {number} location.longitude - 経度。
  * @throws {Error} ユーザーIDが取得できない場合、またはデータの格納に失敗した場合にエラーをスローします。
  */
-export async function storeWeatherData(weatherData) {
+export async function storeWeatherAndLocationData(weatherData, location) {
   try {
     const uid = getCurrentUserUID();
     if (!uid) throw new Error("ユーザーIDが取得できません");
     const userDocRef = doc(db, collectionName, uid);
-    const dailyRecordsRef = collection(userDocRef, subCollectionNames.users[1]);
 
     const weatherDataToStore = {
       forecastDate: Timestamp.fromDate(weatherData.forecastDate),
@@ -265,30 +233,21 @@ export async function storeWeatherData(weatherData) {
       humidity: weatherData.humidity,
       pressure: weatherData.pressure,
       windSpeed: weatherData.windSpeed,
-      ...(weatherData.uv !== undefined && { uv: weatherData.uv }),
+      uv: weatherData.uv,
+      location: new GeoPoint(location.latitude, location.longitude)
     };
 
-    // currentRecords.weather を location フィールドを除いて更新
     await updateDoc(userDocRef, {
-      "currentRecords.weather": weatherDataToStore, // location フィールドは含めない
+      "currentRecords.weather": weatherDataToStore,
     });
 
-    // currentRecords から location 情報を取得
-    const userDocSnapshot = await getDoc(userDocRef);
-    const currentLocation = userDocSnapshot.data()?.currentRecords?.weather?.location || null;
-
-    // dailyRecords に location 情報を含めて追加
+    const dailyRecordsRef = collection(userDocRef, subCollectionNames.users[1]);
     await addDoc(dailyRecordsRef, {
-      weather: {
-        ...weatherDataToStore,
-        location: currentLocation, // currentRecords から取得した location を追加
-      },
-      createdDate: Timestamp.fromDate(weatherData.forecastDate),
+      weather: weatherDataToStore,
     });
-
   } catch (error) {
-    console.error("天気情報の格納に失敗しました:", error);
-    throw new Error("天気情報の格納に失敗しました");
+    console.error("天気情報と位置情報の格納に失敗しました:", error);
+    throw new Error("天気情報と位置情報の格納に失敗しました");
   }
 }
 
