@@ -1,7 +1,7 @@
-build
-node_modules
-frontend/dist
-.DS_Store
+build/
+node_modules/
+frontend/dist/
+DS_Store/
 
 *.env
 *.DS_Store
