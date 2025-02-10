@@ -1,4 +1,5 @@
-import { model } from "firebase"; // Vertex AI モデルの初期化
+
+/*import { model } from "./firebase";*/ // Vertex AI モデルの初期化
 
 
 /* <必要データの策定> (1.フロントへ送る / 2.データベースへ格納)
@@ -11,7 +12,7 @@ import { model } from "firebase"; // Vertex AI モデルの初期化
 ・気象情報 (7日分) -> getWeatherForecast(startDate, days)
 
 */
-
+/*
 export async function conditionComment() {
     // テキストを含むプロンプトを提供
     const prompt = "魔法のリュックサックについての物語を書いてください。";
@@ -35,3 +36,4 @@ export async function weatherComment() {
     const text = response.text();
     console.log(text);
 }
+*/

@@ -1,147 +1,207 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signUpWithEmail, signInWithEmail, signInWithGoogle, signOutUser } from "../services/auth";
-import "../index.css"
+import {
+  signInWithEmail,
+  signInWithGoogle,
+  signOutUser,
+} from "../services/auth";
+import "../index.css";
+import * as dbAPI from "../services/firestoreAPI";
 
-const Authpage = () => {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [user, setUser] = useState(null);
-    const navigate = useNavigate()
-    const handleHome = () => {
-        navigate('/Home')
+const AuthPage = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+
+  // リダイレクト先を切り替える共通関数
+  const redirectByProfile = async () => {
+    try {
+      await dbAPI.getProfile();
+      
+      // 本日の睡眠データを確認
+      const today = new Date();
+      const { sleepHours, date } = await dbAPI.getSleepForDate(today);
+
+      console.log(sleepHours, date);
+      
+      if (sleepHours === null || date === null) {
+        // 睡眠データが未記録の場合は質問ページへ
+        navigate("/daily_question");
+      } else {
+        // 睡眠データが記録済みの場合はホームへ
+        navigate("/home");
+      }
+    } catch (error) {
+      // プロフィールが存在しない場合は登録ページへ
+      navigate("/regi");
     }
+  };
 
-    const handleSignUp = async () => {
-        try {
-            const newUser = await signUpWithEmail(email, password);
-            setUser(newUser);
-            handleHome();
-        } catch (error) {
-            alert(`FAILED SIGNUP: ${error.message}`);
-        }
-    };
+  const handleSignIn = async (e) => {
+    e.preventDefault();
+    try {
+      const loggedInUser = await signInWithEmail(email, password);
+      setUser(loggedInUser);
+      // サインイン後にプロファイルを取得してリダイレクト
+      redirectByProfile();
+    } catch (error) {
+      alert(`サインインに失敗しました: ${error.message}`);
+    }
+  };
 
-    const handleSignIn = async () => {
-        try {
-            const loggedInUser = await signInWithEmail(email, password);
-            setUser(loggedInUser);
-            console.log(user)
-            handleHome();
-        } catch (error) {
-            alert(`FAILED SIGNIN: ${error.message}`);
-        }
-    };
+  const handleGoogleSignIn = async () => {
+    try {
+      const googleUser = await signInWithGoogle();
+      setUser(googleUser);
+      // サインイン後にプロファイルを取得してリダイレクト
+      redirectByProfile();
+    } catch (error) {
+      alert(`Googleでのサインインに失敗しました: ${error.message}`);
+    }
+  };
 
-    const handleGoogleSignIn = async () => {
-        try {
-            const googleUser = await signInWithGoogle();
-            setUser(googleUser);
-            handleHome();
-        } catch (error) {
-            alert(`FAILED SIGNIN WITH GOOGLE: ${error.message}`);
-        }
-    };
+  const handleSignOut = async () => {
+    try {
+      await signOutUser();
+      setUser(null);
+    } catch (error) {
+      alert(`サインアウトに失敗しました: ${error.message}`);
+    }
+  };
 
-    const handleSignOut = async () => {
-        try {
-            await signOutUser();
-            setUser(null);
-        } catch (error) {
-            alert(`FAILED SIGNOUT: ${error.message}`);
-        }
-    };
+  return (
+    // 全体の背景色を bg-pink-100 に変更
+    <div className="min-h-screen flex items-center justify-center bg-pink-100">
+      {/* コンテナの背景色を bg-pink-50 に変更 */}
+      <div className="w-full max-w-md bg-pink-50 shadow-md rounded-2xl p-8 border border-pink-200">
+        {/* ヘッダー部分 */}
+        <div className="mb-6 text-center">
+          <img
+            src="images/1.png"
+            alt="あなたの会社"
+            className="mx-auto h-24 w-24 rounded-full border-2 border-pink-300"
+          />
+          <h2 className="mt-4 text-2xl font-bold text-pink-600">
+            アカウントにサインイン
+          </h2>
+        </div>
 
-    return (
-        <>
-            <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-                <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-                    <img
-                        alt="Your Company"
-                        src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=600"
-                        className="mx-auto h-10 w-auto"
-                    />
-                    <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900">
-                        Sign in to your account
-                    </h2>
-                </div>
+        {/* サインインフォーム */}
+        <form onSubmit={handleSignIn} className="space-y-5">
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-pink-700"
+            >
+              メールアドレス
+            </label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+              className="mt-1 block w-full px-4 py-2 border border-pink-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-300"
+            />
+          </div>
 
-                <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                    <form action="#" method="POST" className="space-y-6">
-                        <div>
-                            <label htmlFor="email" className="block text-sm/6 font-medium text-gray-900">
-                                Email address
-                            </label>
-                            <div className="mt-2">
-                                <input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                    autoComplete="email"
-                                    className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                                />
-                            </div>
-                        </div>
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-pink-700"
+            >
+              パスワード
+            </label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+              className="mt-1 block w-full px-4 py-2 border border-pink-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-300"
+            />
+          </div>
 
-                        <div>
-                            <div className="flex items-center justify-between">
-                                <label htmlFor="password" className="block text-sm/6 font-medium text-gray-900">
-                                    Password
-                                </label>
-                                <div className="text-sm">
-                                    <a href="#" className="font-semibold text-indigo-600 hover:text-indigo-500">
-                                        Forgot password?
-                                    </a>
-                                </div>
-                            </div>
-                            <div className="mt-2">
-                                <input
-                                    id="password"
-                                    name="password"
-                                    type="password"
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                    autoComplete="current-password"
-                                    className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                                />
-                            </div>
-                        </div>
-
-                        <div>
-                            <button
-                                type="submit"
-                                className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                                onClick={handleSignIn}
-                            >
-                                Sign in
-                            </button>
-                        </div>
-                    </form>
-
-                    <p className="mt-10 text-center text-sm/6 text-gray-500">
-                        Not a member?{' '}
-                        <a href="#" className="font-semibold text-indigo-600 hover:text-indigo-500">
-                            Start a 14 day free trial
-                        </a>
-                    </p>
-
-                    <div className="button-group">
-                        <button onClick={handleSignUp} className="button signup">
-                            サインアップ
-                        </button>
-                        <button onClick={handleGoogleSignIn} className="button google">
-                            Google サインイン
-                        </button>
-                        <button onClick={handleSignOut} className="button signout">
-                            サインアウト
-                        </button>
-                    </div>
-                </div>
+          <div className="flex items-center justify-between">
+            <div className="text-sm">
+              <a
+                href="#"
+                className="font-medium text-pink-500 hover:text-pink-600"
+              >
+                パスワードをお忘れですか？
+              </a>
             </div>
-        </>
-    );
-}
+          </div>
 
-export default Authpage;
+          <button
+            type="button" // submit ではなく通常のボタンに変更
+            onClick={handleSignIn}
+            className="w-full py-2 px-4 bg-pink-400 text-white rounded-full hover:bg-pink-500 transition duration-200"
+          >
+            サインイン
+          </button>
+
+        </form> 
+
+        {/* その他のアクション */}
+        <div className="mt-6">
+          <p className="text-center text-sm text-pink-600">
+            まだメンバーではありませんか？アカウントを作成してください
+          </p>
+          <div className="mt-4 flex flex-col space-y-3">
+            {/* 新規登録ボタン（背景を白に変更） */}
+            <button
+              onClick={() => navigate("/signup")}
+              className="w-full py-2 px-4 bg-white border border-pink-400 text-pink-400 rounded-full hover:bg-pink-400 hover:text-white transition duration-200"
+            >
+              新規登録
+            </button>
+            {/* Googleサインインボタン（背景を白に変更） */}
+            <button
+              onClick={handleGoogleSignIn}
+              className="w-full py-2 px-4 bg-white border border-pink-300 text-pink-600 rounded-full hover:bg-pink-50 transition duration-200 flex items-center justify-center"
+            >
+              {/* Googleのロゴ（SVG） */}
+              <svg
+                className="h-5 w-5 mr-2"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 48 48"
+              >
+                <path
+                  fill="#EA4335"
+                  d="M24 9.5c3.34 0 5.99 1.14 7.81 2.8l5.72-5.72C33.11 3.81 28.1 2 24 2 14.62 2 6.61 7.2 2.59 14.28l6.71 5.22C10.63 14.2 16.8 9.5 24 9.5z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M46.07 24.55c0-1.64-.15-3.21-.42-4.73H24v8.97h12.53c-.55 2.97-2.2 5.48-4.69 7.17l7.42 5.75C43.42 38.08 46.07 32.43 46.07 24.55z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M10.3 28.96a13.95 13.95 0 0 1 0-8.94l-6.71-5.22a23.93 23.93 0 0 0 0 19.38l6.71-5.22z"
+                />
+                <path
+                  fill="#4285F4"
+                  d="M24 46c5.94 0 10.93-1.97 14.57-5.34l-7.42-5.75a15.72 15.72 0 0 1-7.15 1.91 15.67 15.67 0 0 1-15.67-15.67c0-2.67.65-5.18 1.8-7.37l-6.71-5.22C7.22 8.96 0 16.54 0 24c0 7.46 7.22 15.04 15.67 15.04z"
+                />
+              </svg>
+              Googleでサインイン
+            </button>
+            {user && (
+              <button
+                onClick={handleSignOut}
+                className="w-full py-2 px-4 border border-red-400 text-red-400 rounded-full hover:bg-red-400 hover:text-white transition duration-200"
+              >
+                サインアウト
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AuthPage;

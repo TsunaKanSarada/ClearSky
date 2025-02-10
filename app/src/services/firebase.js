@@ -1,7 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth"; // Authentication
 import { getFirestore } from "firebase/firestore"; // Firestore
-import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "firebase/app-check"; // App Check
 import { getVertexAI, getGenerativeModel } from "firebase/vertexai";
 
 const firebaseConfig = {
@@ -22,11 +21,6 @@ export const auth = getAuth(app);
 // Firestore サービスの初期化
 export const db = getFirestore(app);
 
-// App Check サービスの初期化
-export const appCheck = initializeAppCheck(app, { // reCAPTCHAキー
-    provider: new ReCaptchaEnterpriseProvider(/* 6Ldd59AqAAAAAC0Nurmy4JrdHYA4YnaxD7V9EpHI */),
-    isTokenAutoRefreshEnabled: true // 自動更新を許可
-  });
 // Vertex AI サービスの初期化
 export const vertexAI = getVertexAI(app);
 

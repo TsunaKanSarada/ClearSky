@@ -19,9 +19,15 @@ import {
   limit, // 取得件数制限
   where, // フィルター条件
 } from "firebase/firestore";
-import { db } from "../firebase";
-import { getCurrentUserUID } from "../auth";
-import { collectionName, subCollectionNames } from "./databaseInit";
+import { db } from "./firebase";
+import { getCurrentUserUID } from "./auth";
+
+// コレクション, フィールドを定義
+// コレクション, サブコレクションの名称を定義
+export const collectionName = "users";
+export const subCollectionNames = {
+  users: ["profile", "dailyRecords"],
+};
 
 /**
  * @fileoverview Firestore データベースにデータを格納するための関数群。
@@ -189,45 +195,11 @@ export async function storeSleepData(sleepData) {
 }
 
 /**
- * 位置情報を Firestore に格納します。
+ * 天気データと位置情報を Firestore に格納します。
  * usersコレクションの ユーザーID をドキュメントIDとするドキュメントの currentRecords フィールドを更新し、
  * dailyRecords サブコレクションに新しいドキュメントを追加します。
  *
- * @function storeLocation
- * @async
- * @param {Object} location - 位置情報。
- * @param {number} location.latitude - 緯度。
- * @param {number} location.longitude - 経度。
- * @throws {Error} ユーザーIDが取得できない場合、またはデータの格納に失敗した場合にエラーをスローします。
- */
-export async function storeLocation(location) {
-  try {
-    const uid = getCurrentUserUID();
-    if (!uid) throw new Error("ユーザーIDが取得できません");
-    const userDocRef = doc(db, collectionName, uid);
-
-    await updateDoc(userDocRef, {
-      "currentRecords.weather.location": new GeoPoint(location.latitude, location.longitude),
-    });
-
-    const dailyRecordsRef = collection(userDocRef, subCollectionNames.users[1]);
-    await addDoc(dailyRecordsRef, {
-      weather: {
-        location: new GeoPoint(location.latitude, location.longitude),
-      },
-    });
-  } catch (error) {
-    console.error("位置情報の格納に失敗しました:", error);
-    throw new Error("位置情報の格納に失敗しました");
-  }
-}
-
-/**
- * 天気データを Firestore に格納します。
- * usersコレクションの ユーザーID をドキュメントIDとするドキュメントの currentRecords フィールドを更新し、
- * dailyRecords サブコレクションに新しいドキュメントを追加します。
- *
- * @function storeWeatherData
+ * @function storeWeatherAndLocationData
  * @async
  * @param {Object} weatherData - 天気情報。
  * @param {Date} weatherData.forecastDate - 予報日。
@@ -239,10 +211,13 @@ export async function storeLocation(location) {
  * @param {number} weatherData.humidity - 湿度。
  * @param {number} weatherData.pressure - 気圧。
  * @param {number} weatherData.windSpeed - 風速。
- * @param {number} [weatherData.uv] - UVインデックス (オプション)。
+ * @param {number} weatherData.uv - UVインデックス。
+ * @param {Object} location - 位置情報。
+ * @param {number} location.latitude - 緯度。
+ * @param {number} location.longitude - 経度。
  * @throws {Error} ユーザーIDが取得できない場合、またはデータの格納に失敗した場合にエラーをスローします。
  */
-export async function storeWeatherData(weatherData) {
+export async function storeWeatherAndLocationData(weatherData, location) {
   try {
     const uid = getCurrentUserUID();
     if (!uid) throw new Error("ユーザーIDが取得できません");
@@ -258,24 +233,21 @@ export async function storeWeatherData(weatherData) {
       humidity: weatherData.humidity,
       pressure: weatherData.pressure,
       windSpeed: weatherData.windSpeed,
-      ...(weatherData.uv !== undefined && { uv: weatherData.uv }),
+      uv: weatherData.uv,
+      location: new GeoPoint(location.latitude, location.longitude)
     };
 
     await updateDoc(userDocRef, {
-      "currentRecords.weather": {
-        ...weatherDataToStore,
-        location: userDocRef.currentRecords?.weather?.location || null,
-      },
+      "currentRecords.weather": weatherDataToStore,
     });
 
     const dailyRecordsRef = collection(userDocRef, subCollectionNames.users[1]);
     await addDoc(dailyRecordsRef, {
       weather: weatherDataToStore,
-      createdDate: Timestamp.fromDate(weatherData.forecastDate),
     });
   } catch (error) {
-    console.error("天気情報の格納に失敗しました:", error);
-    throw new Error("天気情報の格納に失敗しました");
+    console.error("天気情報と位置情報の格納に失敗しました:", error);
+    throw new Error("天気情報と位置情報の格納に失敗しました");
   }
 }
 
@@ -595,18 +567,21 @@ export async function getWeatherForecast(startDate, days) {
         uid,
         subCollectionNames.users[1]
       );
+
+      const startDate = new Date(date);
+      startDate.setHours(0, 0, 0, 0);  // JST基準
+      console.log(startDate); // エラー処理
+
+      const endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 1);  // 翌日の開始時刻
+      endDate.setHours(0, 0, 0, 0);
+      console.log(endDate); // エラー処理
+
+      // Firestoreクエリ
       const q = query(
         recordsRef,
-        where(
-          "createdDate",
-          ">=",
-          Timestamp.fromDate(new Date(date.setHours(0, 0, 0, 0)))
-        ),
-        where(
-          "createdDate",
-          "<",
-          Timestamp.fromDate(new Date(date.setDate(date.getDate() + 1)))
-        )
+        where("forecastDate", ">=", Timestamp.fromDate(new Date(startDate))),
+        where("forecastDate", "<", Timestamp.fromDate(new Date(endDate)))
       );
   
       const querySnapshot = await getDocs(q);
