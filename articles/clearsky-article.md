@@ -1,7 +1,7 @@
 ---
 title: "Firebaseを味わい尽くせ！ 限界突破ハッカソン！！"
-emoji: "🌄"
-type: "idea" # tech: 技術記事 / idea: アイデア
+emoji: "🔥"
+type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["react", "Firebase"]
 published: true
 note: |
