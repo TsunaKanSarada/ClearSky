@@ -1,93 +1,67 @@
-# CrearSky - React + Vite + Go(仮)
+# CrearSky
 
-偏頭痛とかを教えてくれます
-
-## 注意
-> [!WARNING]
-> - WSLは使用しないでください
-> - firebase cliへのlogin忘れずに
+CrearSkyは、偏頭痛の予測や健康状態の管理をサポートするアプリケーションです。ユーザーは日々の健康データを入力し、アプリが提供する予測情報を活用することで、より良い生活習慣を築くことができます。
 
 ## プロジェクト解説
+
 ### ディレクトリ構造
 
 ```
- ClearSky/  
-├── doc/           # Zenn記事  
-├── frontend/           # フロントエンド  
-├── src/  
-│   │   ├── components/    # UIコンポーネント  
-│   │   │   ├── header.jsx  
-│   │   │   ├── footer.jsx  
-│   │   │   ├── dashboard.jsx  
-│   │   │   └── authpage.jsx  
-│   │   ├── providers/     # コンテキストプロバイダー  
-│   │   │   └── authproviders.jsx  
-│   │   ├── service/       # 外部サービス連携  
-│   │   │   ├── auth.js     # Firebase認証  
-│   │   │   └── firebase.js  # Firebase設定  
-│   │   └── App.jsx         # アプリケーションのルート  
-│   └── public/            # 静的ファイル  
-│  
-├── Taskfile.yml         # タスクランナー設定  
-└── README.md            # プロジェクト説明  
+app
+├── index.html
+├── src
+│   ├── App.jsx
+│   ├── main.jsx
+│   ├── assets/
+│   ├── components
+│   │   ├── RouteController.jsx // ルーティング
+│   │   ├── authpage.jsx // 認証ページ
+│   │   ├── footer.jsx // フッター
+│   │   ├── header.jsx // ヘッダー
+│   ├── index.css // インデックススタイル
+│   ├── providers
+│   │   └── authproviders.jsx // 認証プロバイダー
+│   └── services
+│       ├── auth.js // auth
+│       ├── firebase.js // firebase api
+│       └── firestoreAPI.js // firestore api
+└── tailwind.config.js
 ```
 
 ### 主要機能
 
-1. 認証機能  
-* Firebase認証（メール/パスワード、Google）  
-* 保護されたルート
-* ログイン状態管理  
-2. ルーティング  
-* プロテクトルート（home）：認証済みユーザーのみ  
-* パブリックルート（/）：ログインページ  
-3. UI構成
-* ダッシュボード：メインコンテンツ  
-* ヘッダー：ナビゲーション  
-* フッター：補足情報  
-4. 開発環境  
-* Vite + React  
-* TailwindCSS  
-* Firebase  
-* Bun（パッケージマネージャー）  
+#### バックエンド・クラウドサービス
 
-## Setup
+- **Firebase**  
+  - **Firebase in VertexAI**: 各ページでVertexAI(momdel: Gemini 1.5-Pro, 1.5-flash)を呼び出し。片頭痛予測からアシスタントのコメント生成、気象情報の総括など一手に担う。
+  - **Firestore**: サーバーレスなデータベースとして、リアルタイムデータの管理を容易にするために使用。  
+  - **App Check**: 不正リクエスト対策として導入。  
+  - **Firebase Authentication**: ユーザー認証を円滑に行うため採用。
+  - **Cloud Functions**: Vertex AIの呼び出しにトリガーを設定するため採用。
 
-### インストール
-#### Mac
-miseを入れたらあとはよしなにやってくれます
-- [mise](https://mise.jdx.dev/getting-started.html)
+#### フロントエンド
 
-#### windows
-手動デス
-- **必須**
-  - [Taskfile](https://taskfile.dev/installation/)
-  - [Bun](https://bun.sh/)
-- 任意
-  - [Go](https://go.dev/)
+- **React**  
+  ユーザーインターフェースの構築において、コンポーネントベースの設計と豊富なエコシステムを活用するため採用。
 
-### tailwindcss
-```bash
-# bun 使う方法もあるけど一旦 npm で
-$ cd frontend
-$ npm install -D tailwindcss postcss autoprefixer
-$ npx tailwindcss init
-```
+- **Vite**  
+  高速な開発サーバーとビルドツールを提供するため、開発体験の向上を目的として選定。
+
+- **Tailwind CSS**  
+  効率的なスタイリングとカスタマイズ性を担保するため、ユーティリティクラスベースのCSSフレームワークを利用。
+
+- **Firebase Web SDK**  
+  Firebase AuthenticationやFirestoreなどと連携し、リアルタイムデータベースやセキュリティ機能を実装するために採用。
+
+#### その他
+
+- **bun**  
+  高速なパッケージマネージャーとビルドツールを提供するため、開発体験の向上を目的として選定。
 
 ### 実行
 
-#### Mac
 ```shell
-mise install
-task pre
-```
-
-#### Windows
-```shell
-task pre
-```
-
-#### Dev
-```shell
-task dev
+bun init
+bun install
+bun dev
 ```
